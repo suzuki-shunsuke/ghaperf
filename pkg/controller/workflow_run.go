@@ -6,12 +6,10 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"time"
 
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghaperf/pkg/github"
 	"github.com/suzuki-shunsuke/ghaperf/pkg/xdg"
-	"github.com/suzuki-shunsuke/slog-error/slogerr"
 )
 
 func (r *Runner) RunWithRunID(ctx context.Context, logger *slog.Logger, input *Input) error {
@@ -19,44 +17,7 @@ func (r *Runner) RunWithRunID(ctx context.Context, logger *slog.Logger, input *I
 	if err != nil {
 		return fmt.Errorf("get jobs by run id: %w", err)
 	}
-	arr := make([]*JobWithSteps, 0, len(jobs))
-	for _, job := range jobs {
-		job, slowSteps, err := r.runJob(ctx, logger, input, job.GetID())
-		if err != nil {
-			return fmt.Errorf("run job ID: %w", slogerr.With(err, "job_id", job.GetID()))
-		}
-		d := jobDuration(job)
-		if d < input.Threshold {
-			continue
-		}
-		arr = append(arr, &JobWithSteps{
-			Job:       job,
-			SlowSteps: slowSteps,
-			Duration:  d,
-		})
-	}
-	if len(arr) == 0 {
-		fmt.Fprintln(r.stdout, "No slow jobs found")
-		return nil
-	}
-	fmt.Fprintln(r.stdout, "## Slow jobs")
-	for _, job := range arr {
-		fmt.Fprintf(r.stdout, "Job Name: %s\n", job.Job.GetName())
-		fmt.Fprintf(r.stdout, "Job ID: %d\n", job.Job.GetID())
-		fmt.Fprintf(r.stdout, "Job Status: %s\n\n", job.Job.GetStatus())
-		fmt.Fprintf(r.stdout, "Job Duration: %s\n\n", job.Duration)
-		fmt.Fprintln(r.stdout, "### Slow steps")
-		if len(job.SlowSteps) == 0 {
-			fmt.Fprintf(r.stdout, "The job %s has no slow steps\n", job.Job.GetName())
-			continue
-		}
-		for i, step := range job.SlowSteps {
-			fmt.Fprintf(r.stdout, "%d. %s: %s\n", i+1, step.Duration, step.Name)
-			for j, group := range step.Groups {
-				fmt.Fprintf(r.stdout, "   %d %s: %s\n", j+1, group.Duration, group.Name)
-			}
-		}
-	}
+	r.viewer.ShowJobs(jobs, input.Threshold)
 	return nil
 }
 
@@ -86,16 +47,6 @@ func (r *Runner) getRun(ctx context.Context, logger *slog.Logger, input *Input) 
 		arr[i] = job
 	}
 	return arr, nil
-}
-
-func jobDuration(job *github.WorkflowJob) time.Duration {
-	return job.GetCompletedAt().Sub(job.GetStartedAt().Time)
-}
-
-type JobWithSteps struct {
-	Job       *github.WorkflowJob
-	SlowSteps []*Step
-	Duration  time.Duration
 }
 
 func (r *Runner) cacheJobIDs(jobs []*github.WorkflowJob, cachePath string) error {

@@ -1,4 +1,4 @@
-package controller
+package parser
 
 import (
 	"bufio"
@@ -54,11 +54,25 @@ import (
 */
 
 type Group struct {
-	Name      string        `json:"name"`
-	StartTime time.Time     `json:"start_time"`
-	EndTime   time.Time     `json:"end_time"`
-	Duration  time.Duration `json:"duration"`
-	Lines     []*Line       `json:"lines"`
+	Name      string    `json:"name"`
+	StartTime time.Time `json:"start_time"`
+	EndTime   time.Time `json:"end_time"`
+	duration  time.Duration
+	Lines     []*Line `json:"lines"`
+}
+
+func (g *Group) Duration() time.Duration {
+	if g == nil {
+		return 0
+	}
+	if g.duration != 0 {
+		return g.duration
+	}
+	if g.EndTime.IsZero() {
+		return 0
+	}
+	g.duration = g.EndTime.Sub(g.StartTime)
+	return g.duration
 }
 
 type Line struct {
@@ -68,7 +82,7 @@ type Line struct {
 
 var ansiEscapeSequence = regexp.MustCompile(`\x1b\[[0-9;]*[A-Za-z]`)
 
-func parseLog(logger *slog.Logger, data io.Reader) ([]*Group, error) {
+func Parse(logger *slog.Logger, data io.Reader) ([]*Group, error) {
 	scanner := bufio.NewScanner(data)
 	groups := make([]*Group, 0, 1)
 	var group *Group
@@ -83,7 +97,6 @@ func parseLog(logger *slog.Logger, data io.Reader) ([]*Group, error) {
 	if group != nil {
 		if group.EndTime.IsZero() {
 			group.EndTime = group.Lines[len(group.Lines)-1].Timestamp
-			group.Duration = group.EndTime.Sub(group.StartTime)
 		}
 		groups = append(groups, group)
 	}
@@ -115,7 +128,6 @@ func parseLogLine(logger *slog.Logger, txt string, group *Group) *Group {
 	case strings.HasPrefix(l, "##[group]"):
 		if group != nil {
 			group.EndTime = t
-			group.Duration = group.EndTime.Sub(group.StartTime)
 			return nil
 		}
 
