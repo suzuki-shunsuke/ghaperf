@@ -1,4 +1,4 @@
-package controller
+package collector
 
 import (
 	"context"
@@ -12,18 +12,9 @@ import (
 	"github.com/suzuki-shunsuke/ghaperf/pkg/xdg"
 )
 
-func (r *Runner) RunWithRunID(ctx context.Context, logger *slog.Logger, input *Input) error {
-	jobs, err := r.getRun(ctx, logger, input)
-	if err != nil {
-		return fmt.Errorf("get jobs by run id: %w", err)
-	}
-	r.viewer.ShowJobs(jobs, input.Threshold)
-	return nil
-}
-
 const statusCompleted = "completed"
 
-func (r *Runner) getRun(ctx context.Context, logger *slog.Logger, input *Input) ([]*github.WorkflowJob, error) {
+func (r *Collector) GetRun(ctx context.Context, logger *slog.Logger, input *Input) ([]*github.WorkflowJob, error) {
 	jobIDsPath := xdg.RunJobIDsCache(input.CacheDir, input.Job.RepoOwner, input.Job.RepoName, input.Job.RunID)
 	b, err := afero.ReadFile(r.fs, jobIDsPath)
 	if err != nil {
@@ -49,7 +40,7 @@ func (r *Runner) getRun(ctx context.Context, logger *slog.Logger, input *Input) 
 	return arr, nil
 }
 
-func (r *Runner) cacheJobIDs(jobs []*github.WorkflowJob, cachePath string) error {
+func (r *Collector) cacheJobIDs(jobs []*github.WorkflowJob, cachePath string) error {
 	jobIDs := make([]int64, len(jobs))
 	for i, job := range jobs {
 		jobIDs[i] = job.GetID()
@@ -64,7 +55,7 @@ func (r *Runner) cacheJobIDs(jobs []*github.WorkflowJob, cachePath string) error
 	return nil
 }
 
-func (r *Runner) getAndCacheRun(ctx context.Context, logger *slog.Logger, input *Input, jobIDsPath string) ([]*github.WorkflowJob, error) {
+func (r *Collector) getAndCacheRun(ctx context.Context, logger *slog.Logger, input *Input, jobIDsPath string) ([]*github.WorkflowJob, error) {
 	run, err := r.gh.GetWorkflowRunByID(ctx, input.Job.RepoOwner, input.Job.RepoName, input.Job.RunID)
 	if err != nil {
 		return nil, fmt.Errorf("get workflow run by ID: %w", err)

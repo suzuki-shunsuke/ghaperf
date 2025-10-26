@@ -41,7 +41,6 @@ func parseFlags(f *controller.InputRun) {
 	pflag.StringVar(&f.StepName, "step-name", "", "step name")
 	pflag.StringVar(&f.Threshold, "threshold", "", "threshold")
 	pflag.StringVar(&f.LogFile, "log-file", "", "log file")
-	pflag.StringVarP(&f.Data, "data", "d", "ghaperf", "data directory")
 	pflag.BoolVar(&f.EnableGHTKN, "ghtkn", false, "Enable the integration with ghtkn")
 	pflag.BoolVarP(&f.Help, "help", "h", false, "Show help")
 	pflag.BoolVarP(&f.Version, "version", "v", false, "Show version")

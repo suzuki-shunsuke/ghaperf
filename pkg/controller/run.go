@@ -11,8 +11,10 @@ import (
 	"time"
 
 	"github.com/spf13/afero"
+	"github.com/suzuki-shunsuke/ghaperf/pkg/collector"
 	"github.com/suzuki-shunsuke/ghaperf/pkg/github"
 	"github.com/suzuki-shunsuke/ghaperf/pkg/log"
+	"github.com/suzuki-shunsuke/ghaperf/pkg/runner"
 	"github.com/suzuki-shunsuke/ghaperf/pkg/xdg"
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
 )
@@ -25,7 +27,6 @@ type InputRun struct {
 	StepName    string
 	Threshold   string
 	LogFile     string
-	Data        string
 	Args        []string
 	EnableGHTKN bool
 	Help        bool
@@ -52,13 +53,6 @@ type Arg struct {
 	Home    string
 }
 
-type Job struct {
-	RepoOwner string
-	RepoName  string
-	RunID     int64
-	JobID     int64
-}
-
 func (c *Controller) Run(ctx context.Context, logger *slog.Logger, logLevelVar *slog.LevelVar, input *InputRun, arg *Arg) error {
 	if err := setLogLevel(logLevelVar, input.LogLevel, arg.Getenv); err != nil {
 		return err
@@ -74,12 +68,13 @@ func (c *Controller) Run(ctx context.Context, logger *slog.Logger, logLevelVar *
 	}
 
 	if input.LogFile != "" {
-		runner := NewRunner(nil, arg.Stdout, arg.Fs)
-		return runner.RunWithLogFile(logger, &Input{
+		if err := runner.NewRunner(nil, arg.Stdout, arg.Fs).RunWithLogFile(logger, &collector.Input{
 			Threshold: threshold,
 			LogFile:   input.LogFile,
-			Data:      input.Data,
-		})
+		}); err != nil {
+			return fmt.Errorf("run with log file: %w", err)
+		}
+		return nil
 	}
 
 	job, err := getJobArg(input, arg)
@@ -94,16 +89,17 @@ func (c *Controller) Run(ctx context.Context, logger *slog.Logger, logLevelVar *
 	if err != nil {
 		return fmt.Errorf("create GitHub client: %w", err)
 	}
-	runner := NewRunner(gh, arg.Stdout, arg.Fs)
-	return runner.Run(ctx, logger, &Input{
+	if err := runner.NewRunner(gh, arg.Stdout, arg.Fs).Run(ctx, logger, &collector.Input{
 		Threshold: threshold,
-		Data:      input.Data,
 		Job:       job,
 		CacheDir:  xdg.CacheDir(arg.Getenv, arg.Home),
-	})
+	}); err != nil {
+		return err //nolint:wrapcheck
+	}
+	return nil
 }
 
-func getJobArg(input *InputRun, arg *Arg) (*Job, error) {
+func getJobArg(input *InputRun, arg *Arg) (*collector.Job, error) {
 	runID, err := getRunID(input.RunID, arg.Getenv)
 	if err != nil {
 		return nil, err
@@ -121,7 +117,7 @@ func getJobArg(input *InputRun, arg *Arg) (*Job, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Job{
+	return &collector.Job{
 		JobID:     input.JobID,
 		RunID:     runID,
 		RepoOwner: repoOwner,
