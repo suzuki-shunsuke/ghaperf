@@ -3,6 +3,7 @@ module github.com/suzuki-shunsuke/ghaperf
 go 1.25.3
 
 require (
+	github.com/google/go-cmp v0.7.0
 	github.com/google/go-github/v76 v76.0.0
 	github.com/lmittmann/tint v1.1.2
 	github.com/spf13/afero v1.15.0

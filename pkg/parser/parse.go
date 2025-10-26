@@ -2,12 +2,15 @@ package parser
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/suzuki-shunsuke/slog-error/slogerr"
 )
 
 /*
@@ -89,8 +92,12 @@ func Parse(logger *slog.Logger, data io.Reader) ([]*Group, error) {
 
 	for scanner.Scan() {
 		txt := scanner.Text()
-		if newGroup := parseLogLine(logger, txt, group); newGroup != nil {
-			groups = append(groups, newGroup)
+		newGroup, err := parseLogLine(txt, group)
+		if err != nil {
+			slogerr.WithError(logger, err).Warn("parse a log line", "line", txt)
+		}
+		if newGroup != nil {
+			groups = append(groups, group)
 			group = newGroup
 		}
 	}
@@ -108,17 +115,17 @@ func Parse(logger *slog.Logger, data io.Reader) ([]*Group, error) {
 	return groups, nil
 }
 
-func parseLogLine(logger *slog.Logger, txt string, group *Group) *Group {
+var errInvalidLogLineFormat = errors.New("invalid log line format")
+
+func parseLogLine(txt string, group *Group) (*Group, error) {
 	d, l, ok := strings.Cut(txt, " ")
 	if !ok {
-		logger.Warn("ignore invalid log line", "line", txt)
-		return nil
+		return nil, errInvalidLogLineFormat
 	}
 	// 2025-10-25T13:48:59.4421674Z ##[group]Runner Image Provisioner
 	t, err := time.Parse("2006-01-02T15:04:05.9999999Z", d)
 	if err != nil {
-		logger.Warn("ignore invalid timestamp", "timestamp", d, "line", txt, "error", err)
-		return nil
+		return nil, fmt.Errorf("invalid timestamp: %w", slogerr.With(err, "timestamp", d))
 	}
 
 	// Remove ANSI escape sequences
@@ -128,21 +135,20 @@ func parseLogLine(logger *slog.Logger, txt string, group *Group) *Group {
 	case strings.HasPrefix(l, "##[group]"):
 		if group != nil {
 			group.EndTime = t
-			return nil
 		}
 
 		return &Group{
 			Name:      strings.TrimPrefix(l, "##[group]"),
 			StartTime: t,
-		}
+		}, nil
 	default:
 		if group == nil {
-			return nil
+			return nil, nil //nolint:nilnil
 		}
 		group.Lines = append(group.Lines, &Line{
 			Timestamp: t,
 			Content:   l,
 		})
 	}
-	return nil
+	return nil, nil //nolint:nilnil
 }
