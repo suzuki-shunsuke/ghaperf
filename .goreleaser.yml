@@ -1,0 +1,45 @@
+---
+version: 2
+project_name: ghaperf
+archives:
+  - name_template: "{{.ProjectName}}_{{.Os}}_{{.Arch}}"
+    files:
+      - LICENSE
+      - README.md
+      - third_party_licenses/**/*
+checksum:
+  name_template: "{{ .ProjectName }}_checksums.txt"
+builds:
+  - binary: ghaperf
+    main: cmd/ghaperf/main.go
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: darwin
+        goarch: amd64
+
+sboms:
+  - id: default
+    disable: false
+
+homebrew_casks:
+  - repository:
+      owner: suzuki-shunsuke
+      name: homebrew-ghaperf
+    commit_msg_template: "Brew formula update for {{ .ProjectName }} version {{ .Tag }}"
+    homepage: https://github.com/suzuki-shunsuke/ghaperf
+    description: ghaperf is a CLI to analyze the performance of GitHub Actions using GitHub API and raw job logs
+    license: MIT
+    skip_upload: true
+    hooks:
+      post:
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/ghaperf"]
+          end
