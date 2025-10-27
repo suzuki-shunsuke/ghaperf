@@ -35,7 +35,7 @@ func (v *Viewer) ShowJobs(jobs []*github.WorkflowJob, threshold time.Duration) {
 	for _, job := range arr {
 		fmt.Fprintf(v.stdout, "Job Name: %s\n", job.Job.GetName())
 		fmt.Fprintf(v.stdout, "Job ID: %d\n", job.Job.GetID())
-		fmt.Fprintf(v.stdout, "Job Status: %s\n\n", job.Job.GetStatus())
+		fmt.Fprintf(v.stdout, "Job Status: %s\n", job.Job.GetStatus())
 		fmt.Fprintf(v.stdout, "Job Duration: %s\n\n", job.Duration)
 		fmt.Fprintln(v.stdout, "### Slow steps")
 		if len(job.SlowSteps) == 0 {
