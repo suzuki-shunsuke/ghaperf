@@ -1,6 +1,6 @@
 # ghaperf
 
-ghaperf is a CLI to analyze the performance of GitHub Actions using GitHub API and raw job logs
+ghaperf is a CLI to analyze the performance of GitHub Actions using GitHub API and raw job logs.
 
 ```sh
 ghaperf --repo szksh-lab-2/test-github-action --job-id 53656655343 --threshold 1s
@@ -24,6 +24,13 @@ Job Duration: 6s
 
 This project is still work in progress.
 Probably CLI doesn't work yet, and the document may be wrong.
+
+## Why?
+
+Unlike [other tools](#similar-works), ghaperf can detect bottlenecks within composite actions.
+Other tools use [the Workflow Jobs APIs](https://docs.github.com/en/rest/actions/workflow-jobs) to get workflow runs and jobs data, but these APIs don’t include step-level data inside composite actions.
+As a result, even if you can identify a slow composite action, you can’t tell which specific steps in the action are causing the slowdown.
+To address this limitation, ghaperf retrieves job logs via the API, parses them, and extracts data from all log groups — including steps within composite actions.
 
 ## Install
 
