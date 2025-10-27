@@ -59,6 +59,20 @@ func (r *Collector) cacheJobIDs(jobs []*github.WorkflowJob, cachePath string) er
 	return nil
 }
 
+func (r *Collector) cacheRun(workflowRun *github.WorkflowRun, cachePath string) error {
+	b, err := json.Marshal(workflowRun)
+	if err != nil {
+		return fmt.Errorf("marshal workflow run: %w", err)
+	}
+	if err := r.fs.MkdirAll(filepath.Dir(cachePath), dirPermission); err != nil {
+		return fmt.Errorf("make dirs for cached workflow run file: %w", err)
+	}
+	if err := afero.WriteFile(r.fs, cachePath, b, filePermission); err != nil {
+		return fmt.Errorf("write cached workflow run file: %w", err)
+	}
+	return nil
+}
+
 func (r *Collector) getAndCacheRun(ctx context.Context, logger *slog.Logger, input *Input, jobIDsPath string) ([]*github.WorkflowJob, error) {
 	run, err := r.gh.GetWorkflowRunByID(ctx, input.Job.RepoOwner, input.Job.RepoName, input.Job.RunID)
 	if err != nil {
@@ -70,12 +84,22 @@ func (r *Collector) getAndCacheRun(ctx context.Context, logger *slog.Logger, inp
 		return nil, fmt.Errorf("get workflow run by ID: %w", err)
 	}
 	if run.GetStatus() == statusCompleted {
-		// cache jobs ids of workflow run
+		// cache workflow run and job ids
 		if err := r.cacheJobIDs(jobs, jobIDsPath); err != nil {
 			return nil, fmt.Errorf("cache job IDs: %w", err)
 		}
+		if err := r.cacheRun(run, xdg.RunCache(input.CacheDir, input.Job.RepoOwner, input.Job.RepoName, input.Job.RunID)); err != nil {
+			return nil, fmt.Errorf("cache a workflow run: %w", err)
+		}
 	}
 	// cache jobs
+	if err := r.cacheJobs(logger, input, jobs); err != nil {
+		return nil, fmt.Errorf("cache jobs: %w", err)
+	}
+	return jobs, nil
+}
+
+func (r *Collector) cacheJobs(logger *slog.Logger, input *Input, jobs []*github.WorkflowJob) error {
 	for _, job := range jobs {
 		if job.GetStatus() != statusCompleted {
 			logger.Warn("job is not completed yet", "job_id", job.GetID(), "status", job.GetStatus())
@@ -87,8 +111,8 @@ func (r *Collector) getAndCacheRun(ctx context.Context, logger *slog.Logger, inp
 		}
 		// cache the job info
 		if err := r.cacheJob(jobCachePath, job); err != nil {
-			return nil, fmt.Errorf("cache job info: %w", err)
+			return fmt.Errorf("cache job info: %w", err)
 		}
 	}
-	return jobs, nil
+	return nil
 }
