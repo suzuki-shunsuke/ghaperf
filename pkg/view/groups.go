@@ -20,6 +20,6 @@ func (v *Viewer) ShowGroups(groups []*parser.Group, threshold time.Duration) {
 
 	fmt.Fprintln(v.stdout, "## Slow log groups")
 	for i, group := range slowGroups {
-		fmt.Fprintf(v.stdout, "%d. %s: %s\n", i+1, group.Duration(), group.Name)
+		fmt.Fprintf(v.stdout, "%d. %s: %s\n", i+1, group.Duration().Round(time.Second), group.Name)
 	}
 }

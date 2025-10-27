@@ -45,7 +45,7 @@ func (v *Viewer) ShowJobs(jobs []*github.WorkflowJob, threshold time.Duration) {
 		for i, step := range job.SlowSteps {
 			fmt.Fprintf(v.stdout, "%d. %s: %s\n", i+1, step.Duration(), step.Name)
 			for j, group := range step.Groups {
-				fmt.Fprintf(v.stdout, "   %d %s: %s\n", j+1, group.Duration(), group.Name)
+				fmt.Fprintf(v.stdout, "   %d. %s: %s\n", j+1, group.Duration().Round(time.Second), group.Name)
 			}
 		}
 	}
