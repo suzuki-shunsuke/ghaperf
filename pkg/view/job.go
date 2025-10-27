@@ -11,10 +11,6 @@ import (
 
 func (v *Viewer) ShowJob(groups []*parser.Group, threshold time.Duration, job *github.WorkflowJob) {
 	slowSteps := getSlowSteps(job.Steps, threshold)
-	if len(slowSteps) == 0 {
-		fmt.Fprintln(v.stdout, "No slow step is found")
-		return
-	}
 	sort.Slice(slowSteps, func(i, j int) bool {
 		return slowSteps[i].Duration() > slowSteps[j].Duration()
 	})
@@ -40,7 +36,9 @@ func (v *Viewer) ShowJob(groups []*parser.Group, threshold time.Duration, job *g
 
 	fmt.Fprintf(v.stdout, "Job Name: %s\n", job.GetName())
 	fmt.Fprintf(v.stdout, "Job ID: %d\n", job.GetID())
+	fmt.Fprintf(v.stdout, "Job URL: %s\n", job.GetHTMLURL())
 	fmt.Fprintf(v.stdout, "Job Status: %s\n", job.GetStatus())
+	fmt.Fprintf(v.stdout, "Job Conclusion: %s\n", job.GetConclusion())
 	fmt.Fprintf(v.stdout, "Job Duration: %s\n", jobDuration(job))
 	fmt.Fprintf(v.stdout, "All Steps Duration: %s\n", allStepsDuration.Round(time.Second))
 	fmt.Fprintf(v.stdout, "Setup Job Duration: %s\n", firstStepStartedAt.Sub(job.StartedAt.Time).Round(time.Second))
