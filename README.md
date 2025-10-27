@@ -65,3 +65,12 @@ ghaperf --repo szksh-lab-2/test-github-action --job-id 53656655343 --threshold 1
 ```sh
 ghaperf --repo szksh-lab-2/test-github-action --run-id 18804539465 --threshold 1s
 ```
+
+## Similar Works
+
+- https://github.com/Kesin11/actions-timeline
+- https://github.com/Kesin11/github_actions_otel_trace
+- https://github.com/Kesin11/CIAnalyzer
+- https://github.com/inception-health/otel-export-trace-action
+- https://github.com/runforesight/workflow-telemetry-action
+- https://github.com/paper2/github-actions-opentelemetry
