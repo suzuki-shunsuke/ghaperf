@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"path/filepath"
 
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghaperf/pkg/github"
@@ -48,6 +49,9 @@ func (r *Collector) cacheJobIDs(jobs []*github.WorkflowJob, cachePath string) er
 	b, err := json.Marshal(jobIDs)
 	if err != nil {
 		return fmt.Errorf("marshal job IDs: %w", err)
+	}
+	if err := r.fs.MkdirAll(filepath.Dir(cachePath), dirPermission); err != nil {
+		return fmt.Errorf("make dirs for cached job IDs file: %w", err)
 	}
 	if err := afero.WriteFile(r.fs, cachePath, b, filePermission); err != nil {
 		return fmt.Errorf("write cached job IDs file: %w", err)
