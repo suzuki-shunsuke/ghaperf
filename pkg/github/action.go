@@ -2,10 +2,13 @@ package github
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+
+	"github.com/suzuki-shunsuke/slog-error/slogerr"
 )
 
 type ActionsService interface {
@@ -48,8 +51,18 @@ func (c *Client) GetWorkflowJobLogs(ctx context.Context, owner, repo string, job
 	if err != nil {
 		return nil, fmt.Errorf("download workflow job logs: %w", err)
 	}
+	if resp.StatusCode != http.StatusOK {
+		defer resp.Body.Close()
+		b, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, fmt.Errorf("read error response body: %w", slogerr.With(err, "status_code", resp.StatusCode))
+		}
+		return nil, fmt.Errorf("download workflow job logs: status code: %w", slogerr.With(errInvalidStatusCode, "status_code", resp.StatusCode, "response_body", string(b)))
+	}
 	return resp.Body, nil
 }
+
+var errInvalidStatusCode = errors.New("invalid status code")
 
 func (c *Client) ListWorkflowJobs(ctx context.Context, owner, repo string, runID int64) ([]*WorkflowJob, error) {
 	opts := &ListWorkflowJobsOptions{

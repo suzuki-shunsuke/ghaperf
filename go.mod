@@ -9,7 +9,6 @@ require (
 	github.com/spf13/afero v1.15.0
 	github.com/spf13/pflag v1.0.10
 	github.com/suzuki-shunsuke/ghtkn-go-sdk v0.2.1
-	github.com/suzuki-shunsuke/go-retryablehttp v0.7.8-2
 	github.com/suzuki-shunsuke/slog-error v0.2.0
 	golang.org/x/oauth2 v0.32.0
 )
@@ -20,7 +19,6 @@ require (
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/google/go-github/v74 v74.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
-	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/stretchr/testify v1.10.0 // indirect
 	github.com/suzuki-shunsuke/go-exec v0.0.1 // indirect
 	github.com/zalando/go-keyring v0.2.6 // indirect

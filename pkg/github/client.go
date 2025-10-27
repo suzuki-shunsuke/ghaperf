@@ -8,7 +8,6 @@ import (
 
 	"github.com/google/go-github/v76/github"
 	"github.com/suzuki-shunsuke/ghtkn-go-sdk/ghtkn"
-	"github.com/suzuki-shunsuke/go-retryablehttp"
 	"golang.org/x/oauth2"
 )
 
@@ -40,6 +39,10 @@ func New(ctx context.Context, logger *slog.Logger, input *InputNew) (*Client, er
 	gh := github.NewClient(httpClient)
 	return &Client{
 		actions: gh.Actions,
+		// This is used to download logs with redirect URLs.
+		// The authentication fails if httpClient is used, so http.DefaultClient is used.
+		// > 401 InvalidAuthenticationInfo - Server failed to authenticate the request. Please refer to the information in the www-authenticate header.
+		http: http.DefaultClient,
 	}, nil
 }
 
@@ -48,25 +51,30 @@ func newHTTPClient(ctx context.Context, logger *slog.Logger, input *InputNew) (*
 	if err != nil {
 		return nil, err
 	}
-	return makeRetryable(oauth2.NewClient(ctx, ts), logger), nil
+	return oauth2.NewClient(ctx, ts), nil
+	// return makeRetryable(oauth2.NewClient(ctx, ts), logger), nil
 }
 
+var errAccessTokenRequired = errors.New("access token is required")
+
 func newTokenSource(logger *slog.Logger, input *InputNew) (oauth2.TokenSource, error) {
-	if input.GHTKNEnabled {
-		client := ghtkn.New()
-		return client.TokenSource(logger, &ghtkn.InputGet{}), nil
-	}
 	if input.AccessToken != "" {
 		return oauth2.StaticTokenSource(
 			&oauth2.Token{AccessToken: input.AccessToken},
 		), nil
 	}
-	return nil, errors.New("either GHTKNEnabled or AccessToken must be set")
+	if input.GHTKNEnabled {
+		client := ghtkn.New()
+		return client.TokenSource(logger, &ghtkn.InputGet{}), nil
+	}
+	return nil, errAccessTokenRequired
 }
 
+/*
 func makeRetryable(client *http.Client, logger *slog.Logger) *http.Client {
 	c := retryablehttp.NewClient()
 	c.HTTPClient = client
 	c.Logger = logger
 	return c.StandardClient()
 }
+*/
