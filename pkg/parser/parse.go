@@ -118,6 +118,7 @@ func Parse(logger *slog.Logger, data io.Reader) ([]*Group, error) {
 var errInvalidLogLineFormat = errors.New("invalid log line format")
 
 func parseLogLine(txt string, group *Group) (*Group, error) {
+	txt = strings.TrimPrefix(txt, "\ufeff") // Remove BOM if exists
 	d, l, ok := strings.Cut(txt, " ")
 	if !ok {
 		return nil, errInvalidLogLineFormat
