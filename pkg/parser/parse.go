@@ -126,6 +126,12 @@ func parseLogLine(txt string, group *Group) (*Group, error) {
 	// 2025-10-25T13:48:59.4421674Z ##[group]Runner Image Provisioner
 	t, err := time.Parse("2006-01-02T15:04:05.9999999Z", d)
 	if err != nil {
+		// The log doesn't start with timestamp.
+		// This is a continuation from the previous log.
+		if group != nil && len(group.Lines) != 0 {
+			group.Lines[len(group.Lines)-1].Content += "\n" + txt
+			return nil, nil //nolint:nilnil
+		}
 		return nil, fmt.Errorf("invalid timestamp: %w", slogerr.With(err, "timestamp", d))
 	}
 
