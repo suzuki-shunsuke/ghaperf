@@ -19,6 +19,11 @@ func (v *Viewer) ShowJob(groups []*parser.Group, threshold time.Duration, job *g
 		return slowSteps[i].Duration() > slowSteps[j].Duration()
 	})
 
+	allStepsDuration := time.Duration(0)
+	for _, step := range job.Steps {
+		allStepsDuration += step.GetCompletedAt().Sub(step.GetStartedAt().Time)
+	}
+
 	slowGroups := getSlowGroups(groups, threshold)
 
 	for _, step := range slowSteps {
@@ -30,10 +35,17 @@ func (v *Viewer) ShowJob(groups []*parser.Group, threshold time.Duration, job *g
 		})
 	}
 
+	firstStepStartedAt := job.Steps[0].GetStartedAt().Time
+	lastStepCompletedAt := job.Steps[len(job.Steps)-1].GetCompletedAt().Time
+
 	fmt.Fprintf(v.stdout, "Job Name: %s\n", job.GetName())
 	fmt.Fprintf(v.stdout, "Job ID: %d\n", job.GetID())
 	fmt.Fprintf(v.stdout, "Job Status: %s\n", job.GetStatus())
-	fmt.Fprintf(v.stdout, "Job Duration: %s\n\n", jobDuration(job))
+	fmt.Fprintf(v.stdout, "Job Duration: %s\n", jobDuration(job))
+	fmt.Fprintf(v.stdout, "All Steps Duration: %s\n", allStepsDuration.Round(time.Second))
+	fmt.Fprintf(v.stdout, "Setup Job Duration: %s\n", firstStepStartedAt.Sub(job.StartedAt.Time).Round(time.Second))
+	fmt.Fprintf(v.stdout, "Cleanup Job Duration: %s\n", job.GetCompletedAt().Sub(lastStepCompletedAt).Round(time.Second))
+	fmt.Fprintf(v.stdout, "Steps Overhead: %s\n\n", (lastStepCompletedAt.Sub(firstStepStartedAt) - allStepsDuration).Round(time.Second))
 	if len(slowSteps) == 0 {
 		fmt.Fprintf(v.stdout, "The job %s has no slow steps\n", job.GetName())
 		return
