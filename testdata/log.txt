@@ -1,0 +1,103 @@
+2025-10-25T14:46:09.6953658Z Current runner version: '2.329.0'
+2025-10-25T14:46:09.6980324Z ##[group]Runner Image Provisioner
+2025-10-25T14:46:09.6981111Z Hosted Compute Agent
+2025-10-25T14:46:09.6981609Z Version: 20250912.392
+2025-10-25T14:46:09.6982376Z Commit: d921fda672a98b64f4f82364647e2f10b2267d0b
+2025-10-25T14:46:09.6983032Z Build Date: 2025-09-12T15:23:14Z
+2025-10-25T14:46:09.6983618Z ##[endgroup]
+2025-10-25T14:46:09.6984266Z ##[group]Operating System
+2025-10-25T14:46:09.6984836Z Ubuntu
+2025-10-25T14:46:09.6985278Z 24.04.3
+2025-10-25T14:46:09.6985822Z LTS
+2025-10-25T14:46:09.6986248Z ##[endgroup]
+2025-10-25T14:46:09.6986740Z ##[group]Runner Image
+2025-10-25T14:46:09.6987392Z Image: ubuntu-24.04
+2025-10-25T14:46:09.6988142Z Version: 20250929.60.1
+2025-10-25T14:46:09.6989163Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20250929.60/images/ubuntu/Ubuntu2404-Readme.md
+2025-10-25T14:46:09.6990786Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20250929.60
+2025-10-25T14:46:09.6991750Z ##[endgroup]
+2025-10-25T14:46:09.6992754Z ##[group]GITHUB_TOKEN Permissions
+2025-10-25T14:46:09.6994767Z Metadata: read
+2025-10-25T14:46:09.6995420Z ##[endgroup]
+2025-10-25T14:46:09.6997969Z Secret source: Actions
+2025-10-25T14:46:09.6998929Z Prepare workflow directory
+2025-10-25T14:46:09.7423833Z Prepare all required actions
+2025-10-25T14:46:09.7479405Z Getting action download info
+2025-10-25T14:46:10.0283481Z Download action repository 'aquaproj/aqua-installer@ea518c135a02fc11ff8024364510c181a5c6b342' (SHA:ea518c135a02fc11ff8024364510c181a5c6b342)
+2025-10-25T14:46:10.5362780Z Complete job name: test
+2025-10-25T14:46:10.5948643Z ##[group]Run echo "start"
+2025-10-25T14:46:10.5949184Z [36;1mecho "start"[0m
+2025-10-25T14:46:10.5985319Z shell: /usr/bin/bash -e {0}
+2025-10-25T14:46:10.5986133Z ##[endgroup]
+2025-10-25T14:46:10.6108958Z start
+2025-10-25T14:46:10.6300469Z ##[group]Run aquaproj/aqua-installer@ea518c135a02fc11ff8024364510c181a5c6b342
+2025-10-25T14:46:10.6301211Z with:
+2025-10-25T14:46:10.6301600Z   aqua_version: v2.55.1
+2025-10-25T14:46:10.6302305Z   github_token: ***
+2025-10-25T14:46:10.6302742Z   enable_aqua_install: true
+2025-10-25T14:46:10.6303194Z   aqua_opts: -l
+2025-10-25T14:46:10.6303597Z   skip_install_aqua: false
+2025-10-25T14:46:10.6304278Z ##[endgroup]
+2025-10-25T14:46:10.6412324Z ##[group]Run echo "${AQUA_ROOT_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/aquaproj-aqua}/bin" >> $GITHUB_PATH
+2025-10-25T14:46:10.6413454Z [36;1mecho "${AQUA_ROOT_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/aquaproj-aqua}/bin" >> $GITHUB_PATH[0m
+2025-10-25T14:46:10.6446568Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2025-10-25T14:46:10.6447191Z ##[endgroup]
+2025-10-25T14:46:10.6552158Z ##[group]Run if [ "${SKIP_INSTALL_AQUA:-}" = true ] && command -v aqua >/dev/null; then
+2025-10-25T14:46:10.6553090Z [36;1mif [ "${SKIP_INSTALL_AQUA:-}" = true ] && command -v aqua >/dev/null; then[0m
+2025-10-25T14:46:10.6553836Z [36;1m  echo "[INFO] Installing aqua is skipped" >&2[0m
+2025-10-25T14:46:10.6554401Z [36;1m  exit 0[0m
+2025-10-25T14:46:10.6554785Z [36;1mfi[0m
+2025-10-25T14:46:10.6555292Z [36;1m"${GITHUB_ACTION_PATH}/aqua-installer" -v "$AQUA_VERSION"[0m
+2025-10-25T14:46:10.6586974Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2025-10-25T14:46:10.6587906Z env:
+2025-10-25T14:46:10.6588260Z   AQUA_VERSION: v2.55.1
+2025-10-25T14:46:10.6588698Z   SKIP_INSTALL_AQUA: false
+2025-10-25T14:46:10.6589312Z   GITHUB_TOKEN: ***
+2025-10-25T14:46:10.6589708Z ##[endgroup]
+2025-10-25T14:46:10.6741352Z [INFO] Installing aqua v2.53.10 for bootstrapping...
+2025-10-25T14:46:10.6742987Z [INFO] Downloading https://github.com/aquaproj/aqua/releases/download/v2.53.10/aqua_linux_amd64.tar.gz ...
+2025-10-25T14:46:10.6811210Z   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+2025-10-25T14:46:10.6812062Z                                  Dload  Upload   Total   Spent    Left  Speed
+2025-10-25T14:46:10.6812563Z 
+2025-10-25T14:46:10.7893941Z   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+2025-10-25T14:46:10.7895562Z   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+2025-10-25T14:46:10.8417306Z 
+2025-10-25T14:46:10.8418199Z 100 8167k  100 8167k    0     0  49.5M      0 --:--:-- --:--:-- --:--:-- 49.5M
+2025-10-25T14:46:10.8448371Z [INFO] Verifying checksum of aqua v2.53.10 ...
+2025-10-25T14:46:10.8627932Z aqua_linux_amd64.tar.gz: OK
+2025-10-25T14:46:11.0177210Z [INFO] /tmp/tmp.oVTossAupI/aqua update-aqua v2.55.1
+2025-10-25T14:46:11.0496532Z time=2025-10-25T14:46:11Z level=info msg=download and unarchive the package env=linux/amd64 new_version=v2.55.1 package_name=aquaproj/aqua package_version=v2.55.1 program=aqua program_version=2.53.10 registry=
+2025-10-25T14:46:11.2260085Z time=2025-10-25T14:46:11Z level=info msg=verify a package with slsa-verifier env=linux/amd64 new_version=v2.55.1 package_name=aquaproj/aqua package_version=v2.55.1 program=aqua program_version=2.53.10 registry=
+2025-10-25T14:46:11.2263946Z time=2025-10-25T14:46:11Z level=info msg=download and unarchive the package env=linux/amd64 new_version=v2.55.1 package_name=slsa-framework/slsa-verifier package_version=v2.7.1 program=aqua program_version=2.53.10 registry=
+2025-10-25T14:46:11.7590064Z Verified build using builder "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@refs/tags/v2.1.0" at commit 011b65c0d25dd0b9789a1b00db4021450e57fdbc
+2025-10-25T14:46:11.7591298Z Verifying artifact /tmp/779021111: PASSED
+2025-10-25T14:46:11.7591562Z 
+2025-10-25T14:46:11.7591731Z PASSED: SLSA verification passed
+2025-10-25T14:46:11.9227333Z time=2025-10-25T14:46:11Z level=info msg=create a symbolic link env=linux/amd64 new_version=v2.55.1 package_name=aquaproj/aqua package_version=v2.55.1 program=aqua program_version=2.53.10
+2025-10-25T14:46:11.9242257Z [INFO] aqua is installed into /home/runner/.local/share/aquaproj-aqua/bin/aqua
+2025-10-25T14:46:11.9242925Z 
+2025-10-25T14:46:11.9243332Z [INFO] Please add the path to the environment variable "PATH"
+2025-10-25T14:46:11.9244395Z [INFO] export PATH=${AQUA_ROOT_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/aquaproj-aqua}/bin:$PATH
+2025-10-25T14:46:11.9245078Z ===============================================================
+2025-10-25T14:46:11.9245478Z ===============================================================
+2025-10-25T14:46:11.9245738Z 
+2025-10-25T14:46:11.9296736Z aqua version 2.55.1
+2025-10-25T14:46:11.9510527Z ##[group]Run aqua i $AQUA_OPTS
+2025-10-25T14:46:11.9510972Z [36;1maqua i $AQUA_OPTS[0m
+2025-10-25T14:46:11.9544390Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2025-10-25T14:46:11.9544940Z env:
+2025-10-25T14:46:11.9545282Z   AQUA_OPTS: -l
+2025-10-25T14:46:11.9545989Z   GITHUB_TOKEN: ***
+2025-10-25T14:46:11.9546376Z ##[endgroup]
+2025-10-25T14:46:11.9654482Z time=2025-10-25T14:46:11Z level=info msg=download and unarchive the package env=linux/amd64 package_name=aqua-proxy package_version=v1.2.12 program=aqua program_version=2.55.1 registry=
+2025-10-25T14:46:12.1574349Z time=2025-10-25T14:46:12Z level=info msg=create a symbolic link env=linux/amd64 package_name=aqua-proxy package_version=v1.2.12 program=aqua program_version=2.55.1 registry=
+2025-10-25T14:46:12.1647422Z ##[group]Run sleep 2
+2025-10-25T14:46:12.1648283Z [36;1msleep 2[0m
+2025-10-25T14:46:12.1682684Z shell: /usr/bin/bash -e {0}
+2025-10-25T14:46:12.1682971Z ##[endgroup]
+2025-10-25T14:46:14.1789119Z ##[group]Run echo "end"
+2025-10-25T14:46:14.1789408Z [36;1mecho "end"[0m
+2025-10-25T14:46:14.1882722Z shell: /usr/bin/bash -e {0}
+2025-10-25T14:46:14.1882984Z ##[endgroup]
+2025-10-25T14:46:14.1934070Z end
+2025-10-25T14:46:14.1974508Z Cleaning up orphan processes
