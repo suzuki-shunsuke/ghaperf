@@ -10,8 +10,8 @@ import (
 	"github.com/suzuki-shunsuke/ghaperf/pkg/xdg"
 )
 
-func (c *Collector) GetJobLog(ctx context.Context, input *Input, jobID int64, jobCachePath string) ([]byte, error) {
-	cachePath := xdg.JobLogCache(jobCachePath)
+func (c *Collector) GetJobLog(ctx context.Context, input *Input, jobID int64) ([]byte, error) {
+	cachePath := xdg.JobLogCache(xdg.JobCache(input.CacheDir, input.RepoOwner, input.RepoName, jobID))
 	b, err := afero.ReadFile(c.fs, cachePath)
 	if err != nil {
 		if !errors.Is(err, afero.ErrFileNotFound) {
@@ -27,7 +27,7 @@ func (c *Collector) GetJobLog(ctx context.Context, input *Input, jobID int64, jo
 const filePermission = 0o644
 
 func (c *Collector) getAndCacheLog(ctx context.Context, input *Input, jobID int64, cachePath string) ([]byte, error) {
-	logReader, err := c.gh.GetWorkflowJobLogs(ctx, input.Job.RepoOwner, input.Job.RepoName, jobID)
+	logReader, err := c.gh.GetWorkflowJobLogs(ctx, input.RepoOwner, input.RepoName, jobID)
 	if err != nil {
 		return nil, fmt.Errorf("get workflow job logs: %w", err)
 	}

@@ -9,10 +9,10 @@ import (
 )
 
 func (r *Runner) runWithRunID(ctx context.Context, logger *slog.Logger, input *collector.Input) error {
-	jobs, err := r.collector.GetRun(ctx, logger, input)
+	run, jobs, err := r.collector.GetRun(ctx, logger, input)
 	if err != nil {
 		return fmt.Errorf("get jobs by run id: %w", err)
 	}
-	r.viewer.ShowJobs(jobs, input.Threshold)
+	r.viewer.ShowJobs(run, jobs, input.Threshold)
 	return nil
 }

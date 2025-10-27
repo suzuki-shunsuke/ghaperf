@@ -91,15 +91,25 @@ func (c *Controller) Run(ctx context.Context, logger *slog.Logger, logLevelVar *
 	}
 	if err := runner.NewRunner(gh, arg.Stdout, arg.Fs).Run(ctx, logger, &collector.Input{
 		Threshold: threshold,
-		Job:       job,
 		CacheDir:  xdg.CacheDir(arg.Getenv, arg.Home),
+		RepoOwner: job.RepoOwner,
+		RepoName:  job.RepoName,
+		RunID:     job.RunID,
+		JobID:     job.ID,
 	}); err != nil {
 		return err //nolint:wrapcheck
 	}
 	return nil
 }
 
-func getJobArg(input *InputRun, arg *Arg) (*collector.Job, error) {
+type Job struct {
+	ID        int64
+	RepoOwner string
+	RepoName  string
+	RunID     int64
+}
+
+func getJobArg(input *InputRun, arg *Arg) (*Job, error) {
 	runID, err := getRunID(input.RunID, arg.Getenv)
 	if err != nil {
 		return nil, err
@@ -117,8 +127,8 @@ func getJobArg(input *InputRun, arg *Arg) (*collector.Job, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &collector.Job{
-		JobID:     input.JobID,
+	return &Job{
+		ID:        input.JobID,
 		RunID:     runID,
 		RepoOwner: repoOwner,
 		RepoName:  repoName,
