@@ -83,8 +83,6 @@ type Line struct {
 	Content   string    `json:"content"`
 }
 
-var ansiEscapeSequence = regexp.MustCompile(`\x1b\[[0-9;]*[A-Za-z]`)
-
 func Parse(logger *slog.Logger, data io.Reader) ([]*Group, error) {
 	scanner := bufio.NewScanner(data)
 	groups := make([]*Group, 0, 1)
@@ -115,12 +113,22 @@ func Parse(logger *slog.Logger, data io.Reader) ([]*Group, error) {
 	return groups, nil
 }
 
-var errInvalidLogLineFormat = errors.New("invalid log line format")
+var (
+	ansiEscapeSequence      = regexp.MustCompile(`\x1b\[[0-9;]*[A-Za-z]`)
+	errInvalidLogLineFormat = errors.New("invalid log line format")
+)
 
-func parseLogLine(txt string, group *Group) (*Group, error) {
-	txt = strings.TrimPrefix(txt, "\ufeff") // Remove BOM if exists
+func parseLogLine(txt string, group *Group) (*Group, error) { //nolint:cyclop
+	txt = ansiEscapeSequence.ReplaceAllString(
+		strings.TrimPrefix(txt, "\ufeff"), "") // Remove BOM and ANSI escape sequences
 	d, l, ok := strings.Cut(txt, " ")
 	if !ok {
+		// The log doesn't start with timestamp.
+		// This is a continuation from the previous log.
+		if group != nil && len(group.Lines) != 0 {
+			group.Lines[len(group.Lines)-1].Content += "\n" + txt
+			return nil, nil //nolint:nilnil
+		}
 		return nil, errInvalidLogLineFormat
 	}
 	// 2025-10-25T13:48:59.4421674Z ##[group]Runner Image Provisioner
@@ -134,9 +142,6 @@ func parseLogLine(txt string, group *Group) (*Group, error) {
 		}
 		return nil, fmt.Errorf("invalid timestamp: %w", slogerr.With(err, "timestamp", d))
 	}
-
-	// Remove ANSI escape sequences
-	l = ansiEscapeSequence.ReplaceAllString(l, "")
 
 	switch {
 	case strings.HasPrefix(l, "##[group]"):
