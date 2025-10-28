@@ -17,6 +17,7 @@ OPTIONS:
    --repo <owner>/<repo>                          Specify the repository
    --run-id <run id>                              Specify the run ID
    --job-id <job id>                              Specify the job ID
+   --attempt-number <attempt number>              Specify the workflow run's attempt number
    --threshold <time duration> 				      Specify the threshold duration (e.g., 30s, 1m)
    --log-file <file path>						  Specify the job log file path
    --help, -h                                     Show help
