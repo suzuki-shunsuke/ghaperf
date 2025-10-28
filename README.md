@@ -1,6 +1,8 @@
 # ghaperf
 
 ghaperf is a CLI to analyze the performance of GitHub Actions using GitHub API and raw job logs.
+It's useful to detect the bottlenecks inside composite actions.
+It outputs a report about the performance with the markdown format.
 
 ```sh
 ghaperf --repo szksh-lab-2/test-github-action --job-id 53656655343 --threshold 1s
