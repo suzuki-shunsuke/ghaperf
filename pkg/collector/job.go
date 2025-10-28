@@ -28,6 +28,11 @@ func (c *Collector) GetJob(ctx context.Context, logger *slog.Logger, input *Inpu
 			Job: job,
 		}, nil
 	}
+	if job.GetConclusion() == "skipped" {
+		return &Job{
+			Job: job,
+		}, nil
+	}
 	jobLog, err := c.GetJobLog(ctx, input, jobID)
 	if err != nil {
 		slogerr.WithError(logger, err).Error("get a job log", logArgs...)
