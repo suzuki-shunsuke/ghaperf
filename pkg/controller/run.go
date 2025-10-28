@@ -51,61 +51,52 @@ type Arg struct {
 	Home    string
 }
 
-func (c *Controller) Run(ctx context.Context, logger *slog.Logger, logLevelVar *slog.LevelVar, input *InputRun, arg *Arg) error {
-	if err := setLogLevel(logLevelVar, input.LogLevel, arg.Getenv); err != nil {
+func (c *Controller) Run(ctx context.Context, logger *slog.Logger, logLevelVar *slog.LevelVar, inputRun *InputRun, arg *Arg) error {
+	if err := setLogLevel(logLevelVar, inputRun.LogLevel, arg.Getenv); err != nil {
 		return err
 	}
-
-	if err := setEnableGHTKN(input, arg.Getenv); err != nil {
-		return err
-	}
-
-	threshold, err := getThreshold(input.Threshold, arg.Getenv)
+	input, err := c.getInput(inputRun, arg)
 	if err != nil {
 		return err
 	}
 
-	if input.LogFile != "" {
-		if err := runner.NewRunner(nil, arg.Stdout, arg.Fs).RunWithLogFile(logger, &collector.Input{
-			Threshold: threshold,
-			LogFile:   input.LogFile,
-		}); err != nil {
+	if inputRun.LogFile != "" {
+		if err := runner.NewRunner(nil, arg.Stdout, arg.Fs).RunWithLogFile(logger, input); err != nil {
 			return fmt.Errorf("run with log file: %w", err)
 		}
 		return nil
 	}
 
-	job, err := getJobArg(input)
-	if err != nil {
-		return err
-	}
-
 	gh, err := github.New(ctx, logger, &github.InputNew{
-		GHTKNEnabled: input.EnableGHTKN,
+		GHTKNEnabled: inputRun.EnableGHTKN,
 		AccessToken:  getGitHubToken(arg.Getenv),
 	})
 	if err != nil {
 		return fmt.Errorf("create GitHub client: %w", err)
 	}
-	if err := runner.NewRunner(gh, arg.Stdout, arg.Fs).Run(ctx, logger, &collector.Input{
-		Threshold: threshold,
-		CacheDir:  xdg.CacheDir(arg.Getenv, arg.Home),
-		RepoOwner: job.RepoOwner,
-		RepoName:  job.RepoName,
-		RunID:     input.RunID,
-		JobID:     input.JobID,
-	}); err != nil {
+	if err := runner.NewRunner(gh, arg.Stdout, arg.Fs).Run(ctx, logger, input); err != nil {
 		return err //nolint:wrapcheck
 	}
 	return nil
 }
 
-type Job struct {
-	RepoOwner string
-	RepoName  string
-}
+func (c *Controller) getInput(input *InputRun, arg *Arg) (*collector.Input, error) {
+	if err := setEnableGHTKN(input, arg.Getenv); err != nil {
+		return nil, err
+	}
 
-func getJobArg(input *InputRun) (*Job, error) {
+	threshold, err := getThreshold(input.Threshold, arg.Getenv)
+	if err != nil {
+		return nil, err
+	}
+
+	if input.LogFile != "" {
+		return &collector.Input{
+			Threshold: threshold,
+			LogFile:   input.LogFile,
+		}, nil
+	}
+
 	if input.RunID == 0 && input.JobID == 0 {
 		return nil, errors.New("one of --run-id, --job-id, and --log-file must be specified")
 	}
@@ -118,9 +109,14 @@ func getJobArg(input *InputRun) (*Job, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Job{
+
+	return &collector.Input{
+		Threshold: threshold,
+		CacheDir:  xdg.CacheDir(arg.Getenv, arg.Home),
 		RepoOwner: repoOwner,
 		RepoName:  repoName,
+		RunID:     input.RunID,
+		JobID:     input.JobID,
 	}, nil
 }
 
