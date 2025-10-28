@@ -63,7 +63,7 @@ func (r *Collector) cacheRun(workflowRun *github.WorkflowRun, cachePath string) 
 }
 
 func (r *Collector) getRun(ctx context.Context, logger *slog.Logger, input *Input) (*github.WorkflowRun, error) {
-	cachePath := xdg.RunCache(input.CacheDir, input.RepoOwner, input.RepoName, input.RunID)
+	cachePath := xdg.RunCache(input.CacheDir, input.RepoOwner, input.RepoName, input.RunID, input.AttemptNumber)
 	runB, err := afero.ReadFile(r.fs, cachePath)
 	if err != nil {
 		if !errors.Is(err, afero.ErrFileNotFound) {
@@ -79,7 +79,7 @@ func (r *Collector) getRun(ctx context.Context, logger *slog.Logger, input *Inpu
 }
 
 func (r *Collector) getAndCacheRun(ctx context.Context, logger *slog.Logger, input *Input, cachePath string) (*github.WorkflowRun, error) {
-	run, err := r.gh.GetWorkflowRunByID(ctx, input.RepoOwner, input.RepoName, input.RunID)
+	run, err := r.gh.GetWorkflowRunByID(ctx, input.RepoOwner, input.RepoName, input.RunID, input.AttemptNumber)
 	if err != nil {
 		return nil, fmt.Errorf("get workflow run by ID: %w", err)
 	}
@@ -93,7 +93,7 @@ func (r *Collector) getAndCacheRun(ctx context.Context, logger *slog.Logger, inp
 }
 
 func (r *Collector) getJobs(ctx context.Context, logger *slog.Logger, input *Input, run *github.WorkflowRun) ([]*Job, error) {
-	cachePath := xdg.RunJobIDsCache(input.CacheDir, input.RepoOwner, input.RepoName, input.RunID)
+	cachePath := xdg.RunJobIDsCache(input.CacheDir, input.RepoOwner, input.RepoName, input.RunID, input.AttemptNumber)
 	b, err := afero.ReadFile(r.fs, cachePath)
 	if err != nil {
 		if !errors.Is(err, afero.ErrFileNotFound) {
@@ -119,7 +119,7 @@ func (r *Collector) getJobs(ctx context.Context, logger *slog.Logger, input *Inp
 
 func (r *Collector) getAndCacheJobs(ctx context.Context, logger *slog.Logger, input *Input, jobIDsPath string, run *github.WorkflowRun) ([]*Job, error) {
 	// cache not found
-	jobs, err := r.gh.ListWorkflowJobs(ctx, input.RepoOwner, input.RepoName, input.RunID)
+	jobs, err := r.gh.ListWorkflowJobs(ctx, input.RepoOwner, input.RepoName, input.RunID, input.AttemptNumber)
 	if err != nil {
 		return nil, fmt.Errorf("get workflow run by ID: %w", err)
 	}

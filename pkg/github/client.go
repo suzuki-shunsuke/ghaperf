@@ -22,13 +22,14 @@ type InputNew struct {
 }
 
 type (
-	Response                = github.Response
-	Jobs                    = github.Jobs
-	ListWorkflowJobsOptions = github.ListWorkflowJobsOptions
-	WorkflowJob             = github.WorkflowJob
-	WorkflowRun             = github.WorkflowRun
-	ListOptions             = github.ListOptions
-	TaskStep                = github.TaskStep
+	Response                  = github.Response
+	Jobs                      = github.Jobs
+	ListWorkflowJobsOptions   = github.ListWorkflowJobsOptions
+	WorkflowJob               = github.WorkflowJob
+	WorkflowRun               = github.WorkflowRun
+	ListOptions               = github.ListOptions
+	TaskStep                  = github.TaskStep
+	WorkflowRunAttemptOptions = github.WorkflowRunAttemptOptions
 )
 
 func New(ctx context.Context, logger *slog.Logger, input *InputNew) (*Client, error) {

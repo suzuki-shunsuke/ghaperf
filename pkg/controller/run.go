@@ -20,16 +20,17 @@ import (
 )
 
 type InputRun struct {
-	LogLevel    string
-	Repo        string
-	RunID       int64
-	JobID       int64
-	Threshold   string
-	LogFile     string
-	Args        []string
-	EnableGHTKN bool
-	Help        bool
-	Version     bool
+	LogLevel      string
+	Repo          string
+	AttemptNumber int
+	RunID         int64
+	JobID         int64
+	Threshold     string
+	LogFile       string
+	Args          []string
+	EnableGHTKN   bool
+	Help          bool
+	Version       bool
 }
 
 const (
@@ -110,12 +111,13 @@ func (c *Controller) getInput(input *InputRun, arg *Arg) (*collector.Input, erro
 	}
 
 	return &collector.Input{
-		Threshold: threshold,
-		CacheDir:  xdg.CacheDir(arg.Getenv, arg.Home),
-		RepoOwner: repoOwner,
-		RepoName:  repoName,
-		RunID:     input.RunID,
-		JobID:     input.JobID,
+		Threshold:     threshold,
+		CacheDir:      xdg.CacheDir(arg.Getenv, arg.Home),
+		RepoOwner:     repoOwner,
+		RepoName:      repoName,
+		RunID:         input.RunID,
+		JobID:         input.JobID,
+		AttemptNumber: input.AttemptNumber,
 	}, nil
 }
 

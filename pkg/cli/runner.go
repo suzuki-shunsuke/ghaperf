@@ -23,6 +23,7 @@ OPTIONS:
    --repo <owner>/<repo>                          Specify the repository
    --run-id <run id>                              Specify the run ID
    --job-id <job id>                              Specify the job ID
+   --attempt-number <attempt number>              Specify the workflow run's attempt number
    --threshold <time duration> 				      Specify the threshold duration (e.g., 30s, 1m)
    --log-file <file path>						  Specify the job log file path
    --help, -h                                     Show help
@@ -36,6 +37,7 @@ func parseFlags(f *controller.InputRun) {
 	pflag.StringVar(&f.LogLevel, "log-level", "", "log level (debug, info, warn, error)")
 	pflag.StringVar(&f.Repo, "repo", "", "repository (owner/repo)")
 	pflag.Int64Var(&f.RunID, "run-id", 0, "run ID")
+	pflag.IntVar(&f.AttemptNumber, "attempt-number", 0, "workflow run's attempt number")
 	pflag.Int64Var(&f.JobID, "job-id", 0, "job ID")
 	pflag.StringVar(&f.Threshold, "threshold", "", "threshold")
 	pflag.StringVar(&f.LogFile, "log-file", "", "log file")
