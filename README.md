@@ -56,8 +56,6 @@ Private repositories require the `Actions: Read` permission.
 - GHAPERF_GITHUB_TOKEN
 - GHAPERF_GHTKN
 - GHAPERF_THRESHOLD
-- GITHUB_RUN_ID
-- GITHUB_REPOSITORY
 - GITHUB_TOKEN
 
 ## Getting Started

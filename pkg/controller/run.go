@@ -38,8 +38,6 @@ const (
 	envGhaperfGitHubToken = "GHAPERF_GITHUB_TOKEN" //nolint:gosec
 	envEnableGHTKN        = "GHAPERF_GHTKN"
 	envGhaperfThreshold   = "GHAPERF_THRESHOLD"
-	envGitHubRunID        = "GITHUB_RUN_ID"
-	envGitHubRepository   = "GITHUB_REPOSITORY"
 	envGitHubToken        = "GITHUB_TOKEN" //nolint:gosec
 )
 
@@ -110,36 +108,24 @@ type Job struct {
 }
 
 func getJobArg(input *InputRun, arg *Arg) (*Job, error) {
-	runID, err := getRunID(input.RunID, arg.Getenv)
-	if err != nil {
-		return nil, err
-	}
-	if runID == 0 && input.JobID == 0 {
+	if input.RunID == 0 && input.JobID == 0 {
 		return nil, errors.New("one of --run-id, --job-id, and --log-file must be specified")
 	}
 
-	repoFullName := getRepoFullName(input.Repo, arg.Getenv)
-	if repoFullName == "" {
+	if input.Repo == "" {
 		return nil, errors.New("without --log-file, repository must be specified")
 	}
 
-	repoOwner, repoName, err := validateRepo(repoFullName)
+	repoOwner, repoName, err := validateRepo(input.Repo)
 	if err != nil {
 		return nil, err
 	}
 	return &Job{
 		ID:        input.JobID,
-		RunID:     runID,
+		RunID:     input.RunID,
 		RepoOwner: repoOwner,
 		RepoName:  repoName,
 	}, nil
-}
-
-func getRepoFullName(s string, getEnv func(string) string) string {
-	if s != "" {
-		return s
-	}
-	return getEnv(envGitHubRepository)
 }
 
 const defaultThreshold = 30 * time.Second
@@ -154,21 +140,6 @@ func getThreshold(s string, getEnv func(string) string) (time.Duration, error) {
 		return 0, fmt.Errorf("invalid threshold. See https://pkg.go.dev/time#ParseDuration: %w", err)
 	}
 	return d, nil
-}
-
-func getRunID(runID int64, getEnv func(string) string) (int64, error) {
-	if runID != 0 {
-		return runID, nil
-	}
-	s := getEnv(envGitHubRunID)
-	if s == "" {
-		return 0, nil
-	}
-	id, err := strconv.ParseInt(s, 10, 64)
-	if err != nil {
-		return 0, fmt.Errorf("%s must be int64: %w", envGitHubRunID, err)
-	}
-	return id, nil
 }
 
 func getThresholdStr(s string, getEnv func(string) string) string {

@@ -18,6 +18,6 @@ jobs:
       - run: ghaperf -v
       - run: ghaperf -h
       - run: ghaperf --log-file testdata/log.txt --threshold 1s
-      - run: ghaperf --run-id "$GITHUB_RUN_ID" --threshold 1s
+      - run: ghaperf --repo "$GITHUB_REPOSITORY" --run-id "$GITHUB_RUN_ID" --threshold 1s
         env:
           GITHUB_TOKEN: ${{ github.token }}
