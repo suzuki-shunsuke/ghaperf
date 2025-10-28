@@ -21,5 +21,5 @@ jobs:
       - run: ghaperf --run-id "$GITHUB_RUN_ID" --threshold 1s
         env:
           GITHUB_TOKEN: ${{ github.token }}
-      - run: bash scripts/generate-usage.sh
+      - run: bash scripts/usage.sh
       - uses: autofix-ci/action@635ffb0c9798bd160680f18fd73371e355b85f27 # v1.3.2
