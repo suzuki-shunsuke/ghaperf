@@ -7,12 +7,19 @@ ghaperf --repo szksh-lab-2/test-github-action --job-id 53656655343 --threshold 1
 ```
 
 ```markdown
+## Job: test
 Job Name: test
 Job ID: 53656655343
+Job URL: https://github.com/szksh-lab-2/test-github-action/actions/runs/18804539465/job/53656655343
 Job Status: completed
+Job Conclusion: success
 Job Duration: 6s
+All Steps Duration: 5s
+Setup Job Duration: 0s
+Cleanup Job Duration: 1s
+Steps Overhead: 0s
 
-## Slow steps
+### Slow steps
 1. 2s: install aqua
    1. 1s: Run if [ "${SKIP_INSTALL_AQUA:-}" = true ] && command -v aqua >/dev/null; then
 2. 2s: Run sleep 2
