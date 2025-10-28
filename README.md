@@ -78,6 +78,10 @@ ghaperf --repo szksh-lab-2/test-github-action --job-id 53656655343 --threshold 1
 ghaperf --repo szksh-lab-2/test-github-action --run-id 18804539465 --threshold 1s
 ```
 
+## :bulb: Cache
+
+ghaperf caches raw data of completed workflow runs and jobs in the cache directory `${XDG_CACHE_HOME:-${HOME}/.cache}/ghaperf/`.
+
 ## Similar Works
 
 - https://github.com/Kesin11/actions-timeline
