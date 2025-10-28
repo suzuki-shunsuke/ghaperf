@@ -14,7 +14,12 @@ jobs:
         with:
           go-version-file: go.mod
       - run: |
-          go install -ldflags "-X main.version=v1.0.0 -X main.commit=$GITHUB_SHA -X main.date=$(date +"%Y-%m-%dT%H:%M:%SZ%:z" | tr -d '+')" ./cmd/ghaperf
+          go install -ldflags "-X main.version=v0.0.1-0 -X main.commit=$GITHUB_SHA -X main.date=$(date +"%Y-%m-%dT%H:%M:%SZ%:z" | tr -d '+')" ./cmd/ghaperf
       - run: ghaperf -v
       - run: ghaperf -h
       - run: ghaperf --log-file testdata/log.txt --threshold 1s
+      - run: ghaperf --run-id "$GITHUB_RUN_ID" --threshold 1s
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - run: bash scripts/generate-usage.sh
+      - uses: autofix-ci/action@635ffb0c9798bd160680f18fd73371e355b85f27 # v1.3.2
