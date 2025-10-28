@@ -5,11 +5,11 @@ import (
 	"sort"
 	"time"
 
-	"github.com/suzuki-shunsuke/ghaperf/pkg/github"
-	"github.com/suzuki-shunsuke/ghaperf/pkg/parser"
+	"github.com/suzuki-shunsuke/ghaperf/pkg/collector"
 )
 
-func (v *Viewer) ShowJob(groups []*parser.Group, threshold time.Duration, job *github.WorkflowJob) {
+func (v *Viewer) ShowJob(j *collector.Job, threshold time.Duration) {
+	job := j.Job
 	slowSteps := getSlowSteps(job.Steps, threshold)
 	sort.Slice(slowSteps, func(i, j int) bool {
 		return slowSteps[i].Duration() > slowSteps[j].Duration()
@@ -20,7 +20,7 @@ func (v *Viewer) ShowJob(groups []*parser.Group, threshold time.Duration, job *g
 		allStepsDuration += step.GetCompletedAt().Sub(step.GetStartedAt().Time)
 	}
 
-	slowGroups := getSlowGroups(groups, threshold)
+	slowGroups := getSlowGroups(j.Groups, threshold)
 
 	for _, step := range slowSteps {
 		for _, group := range slowGroups {
@@ -34,6 +34,7 @@ func (v *Viewer) ShowJob(groups []*parser.Group, threshold time.Duration, job *g
 	firstStepStartedAt := job.Steps[0].GetStartedAt().Time
 	lastStepCompletedAt := job.Steps[len(job.Steps)-1].GetCompletedAt().Time
 
+	fmt.Fprintf(v.stdout, "## Job: %s\n", job.GetName())
 	fmt.Fprintf(v.stdout, "Job Name: %s\n", job.GetName())
 	fmt.Fprintf(v.stdout, "Job ID: %d\n", job.GetID())
 	fmt.Fprintf(v.stdout, "Job URL: %s\n", job.GetHTMLURL())
@@ -49,7 +50,7 @@ func (v *Viewer) ShowJob(groups []*parser.Group, threshold time.Duration, job *g
 		return
 	}
 
-	fmt.Fprintln(v.stdout, "## Slow steps")
+	fmt.Fprintln(v.stdout, "### Slow steps")
 	for i, step := range slowSteps {
 		fmt.Fprintf(v.stdout, "%d. %s: %s\n", i+1, step.Duration(), step.Name)
 		for j, group := range step.Groups {

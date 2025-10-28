@@ -31,15 +31,15 @@ type GitHub interface {
 }
 
 type Viewer interface {
-	ShowJob(groups []*parser.Group, threshold time.Duration, job *github.WorkflowJob)
+	ShowJob(job *collector.Job, threshold time.Duration)
 	ShowGroups(groups []*parser.Group, threshold time.Duration)
-	ShowJobs(jobs []*github.WorkflowJob, threshold time.Duration)
+	ShowJobs(run *github.WorkflowRun, jobs []*collector.Job, threshold time.Duration)
 }
 
 type Collector interface {
-	GetJobLog(ctx context.Context, input *collector.Input, jobID int64, jobCachePath string) ([]byte, error)
-	GetJob(ctx context.Context, logger *slog.Logger, input *collector.Input, jobID int64) (*github.WorkflowJob, []*parser.Group, error)
-	GetRun(ctx context.Context, logger *slog.Logger, input *collector.Input) ([]*github.WorkflowJob, error)
+	GetJobLog(ctx context.Context, input *collector.Input, jobID int64) ([]byte, error)
+	GetJob(ctx context.Context, logger *slog.Logger, input *collector.Input, jobID int64) (*collector.Job, error)
+	GetRun(ctx context.Context, logger *slog.Logger, input *collector.Input) (*github.WorkflowRun, []*collector.Job, error)
 }
 
 func NewRunner(gh GitHub, stdout io.Writer, fs afero.Fs) *Runner {
@@ -53,12 +53,12 @@ func NewRunner(gh GitHub, stdout io.Writer, fs afero.Fs) *Runner {
 }
 
 func (r *Runner) Run(ctx context.Context, logger *slog.Logger, input *collector.Input) error {
-	if input.Job.JobID != 0 {
-		job, groups, err := r.collector.GetJob(ctx, logger, input, input.Job.JobID)
+	if input.JobID != 0 {
+		job, err := r.collector.GetJob(ctx, logger, input, input.JobID)
 		if err != nil {
-			return fmt.Errorf("run job ID %d: %w", input.Job.JobID, err)
+			return fmt.Errorf("run job ID %d: %w", input.JobID, err)
 		}
-		r.viewer.ShowJob(groups, input.Threshold, job)
+		r.viewer.ShowJob(job, input.Threshold)
 		return nil
 	}
 	return r.runWithRunID(ctx, logger, input)

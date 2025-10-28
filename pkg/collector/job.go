@@ -15,24 +15,27 @@ import (
 	"github.com/suzuki-shunsuke/ghaperf/pkg/xdg"
 )
 
-func (c *Collector) GetJob(ctx context.Context, logger *slog.Logger, input *Input, jobID int64) (*github.WorkflowJob, []*parser.Group, error) {
-	jobCachePath := xdg.JobCache(input.CacheDir, input.Job.RepoOwner, input.Job.RepoName, jobID)
-	job, err := c.getJob(ctx, logger, input, jobID, jobCachePath)
+func (c *Collector) GetJob(ctx context.Context, logger *slog.Logger, input *Input, jobID int64) (*Job, error) {
+	job, err := c.getJob(ctx, logger, input, jobID)
 	if err != nil {
-		return nil, nil, fmt.Errorf("get a job: %w", err)
+		return nil, fmt.Errorf("get a job: %w", err)
 	}
-	jobLog, err := c.GetJobLog(ctx, input, jobID, jobCachePath)
+	jobLog, err := c.GetJobLog(ctx, input, jobID)
 	if err != nil {
-		return nil, nil, fmt.Errorf("get a job log: %w", err)
+		return nil, fmt.Errorf("get a job log: %w", err)
 	}
 	groups, err := parser.Parse(logger, bytes.NewBuffer(jobLog))
 	if err != nil {
-		return nil, nil, fmt.Errorf("parse log: %w", err)
+		return nil, fmt.Errorf("parse log: %w", err)
 	}
-	return job, groups, nil
+	return &Job{
+		Job:    job,
+		Groups: groups,
+	}, nil
 }
 
-func (c *Collector) getJob(ctx context.Context, logger *slog.Logger, input *Input, jobID int64, jobCachePath string) (*github.WorkflowJob, error) {
+func (c *Collector) getJob(ctx context.Context, logger *slog.Logger, input *Input, jobID int64) (*github.WorkflowJob, error) {
+	jobCachePath := xdg.JobCache(input.CacheDir, input.RepoOwner, input.RepoName, jobID)
 	job := &github.WorkflowJob{}
 	b, err := afero.ReadFile(c.fs, jobCachePath)
 	if err != nil {
@@ -40,23 +43,27 @@ func (c *Collector) getJob(ctx context.Context, logger *slog.Logger, input *Inpu
 			return nil, fmt.Errorf("read cached job file: %w", err)
 		}
 		// cache not found
-		job, err := c.gh.GetWorkflowJobByID(ctx, input.Job.RepoOwner, input.Job.RepoName, jobID)
-		if err != nil {
-			return nil, fmt.Errorf("get workflow job by ID: %w", err)
-		}
-		if job.GetStatus() != "completed" {
-			logger.Warn("job is not completed yet", "job_id", jobID, "status", job.GetStatus())
-			return job, nil
-		}
-		// cache the job info
-		if err := c.cacheJob(jobCachePath, job); err != nil {
-			return nil, fmt.Errorf("cache job info: %w", err)
-		}
-		return job, nil
+		return c.getAndCacheJob(ctx, logger, input, jobID, jobCachePath)
 	}
 	// exist cache
 	if err := json.Unmarshal(b, job); err != nil {
 		return nil, fmt.Errorf("unmarshal cached job file: %w", err)
+	}
+	return job, nil
+}
+
+func (c *Collector) getAndCacheJob(ctx context.Context, logger *slog.Logger, input *Input, jobID int64, jobCachePath string) (*github.WorkflowJob, error) {
+	job, err := c.gh.GetWorkflowJobByID(ctx, input.RepoOwner, input.RepoName, jobID)
+	if err != nil {
+		return nil, fmt.Errorf("get workflow job by ID: %w", err)
+	}
+	if job.GetStatus() != "completed" {
+		logger.Warn("job is not completed yet", "job_id", jobID, "status", job.GetStatus())
+		return job, nil
+	}
+	// cache the job info
+	if err := c.cacheJob(jobCachePath, job); err != nil {
+		return nil, fmt.Errorf("cache job info: %w", err)
 	}
 	return job, nil
 }

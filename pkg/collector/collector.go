@@ -7,6 +7,7 @@ import (
 
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghaperf/pkg/github"
+	"github.com/suzuki-shunsuke/ghaperf/pkg/parser"
 )
 
 type Collector struct {
@@ -32,13 +33,14 @@ type Input struct {
 	Threshold time.Duration
 	LogFile   string
 	Data      string
-	Job       *Job
 	CacheDir  string
-}
-
-type Job struct {
 	RepoOwner string
 	RepoName  string
 	RunID     int64
 	JobID     int64
+}
+
+type Job struct {
+	Job    *github.WorkflowJob
+	Groups []*parser.Group
 }
