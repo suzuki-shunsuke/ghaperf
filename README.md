@@ -34,10 +34,11 @@ Probably CLI doesn't work yet, and the document may be wrong.
 
 ## Why?
 
-Unlike [other tools](#similar-works), ghaperf can detect bottlenecks within composite actions.
-Other tools use [the Workflow Jobs APIs](https://docs.github.com/en/rest/actions/workflow-jobs) to get workflow runs and jobs data, but these APIs don’t include step-level data inside composite actions.
-As a result, even if you can identify a slow composite action, you can’t tell which specific steps in the action are causing the slowdown.
-To address this limitation, ghaperf retrieves job logs via the API, parses them, and extracts data from all log groups — including steps within composite actions.
+[There are some awesome tools](#similar-works), but they can't retrieve step-level data inside composite actions because [the Workflow Jobs APIs](https://docs.github.com/en/rest/actions/workflow-jobs) don’t include those data.
+On the other hand, ghaperf can detect bottlenecks within composite actions.
+It retrieves job logs via the API, parses them, and extracts data from all log groups — including steps within composite actions.
+
+Note that the specification of log format isn't published, so ghaperf may fail to parse logs due to unexpected specification, and it may get broken suddenly due to changes of the log specification.
 
 ## Install
 
@@ -45,32 +46,13 @@ To address this limitation, ghaperf retrieves job logs via the API, parses them,
 go install github.com/suzuki-shunsuke/ghaperf/cmd/ghaperf@latest
 ```
 
-## GitHub Access Token
+## Getting Started
 
-A GitHub access token is required to get workflow runs and jobs and their logs.
-Private repositories require the `Actions: Read` permission.
+[A GitHub Access token is required to avoid API rate limit or to access private repositories.](#github-access-token)
 
 ```sh
 export GITHUB_TOKEN=xxx
-# or
-export GHAPERF_GITHUB_TOKEN=xxx
 ```
-
-Or if you use [ghtkn](https://github.com/suzuki-shunsuke/ghtkn), you can enable the integration.
-
-```sh
-export GHAPERF_GHTKN=true
-```
-
-## Environment Variables
-
-- GHAPERF_LOG_LEVEL: `debug|info|warn|error`. The default is `info`
-- GHAPERF_GITHUB_TOKEN
-- GHAPERF_GHTKN
-- GHAPERF_THRESHOLD: The threshold of steps and log groups' duration
-- GITHUB_TOKEN
-
-## Getting Started
 
 1. Run against a log file ([example](https://github.com/suzuki-shunsuke/ghaperf/blob/main/testdata/log.txt)):
 
@@ -109,9 +91,38 @@ e.g.
 The default threshold is `30s`, but you can change this by `--threshold` option and the environment variable `GHAPERF_THRESHOLD`.
 It's parsed by [time.ParseDuration](https://pkg.go.dev/time#ParseDuration).
 
-## :bulb: Cache
+## Environment Variables
+
+- GHAPERF_LOG_LEVEL: `debug|info|warn|error`. The default is `info`
+- GHAPERF_GITHUB_TOKEN
+- GHAPERF_GHTKN
+- GHAPERF_THRESHOLD: The threshold of steps and log groups' duration
+- GITHUB_TOKEN
+
+### GitHub Access Token
+
+A GitHub access token is required to get workflow runs and jobs and their logs.
+Private repositories require the `Actions: Read` permission.
+
+```sh
+export GITHUB_TOKEN=xxx
+# or
+export GHAPERF_GITHUB_TOKEN=xxx
+```
+
+Or if you use [ghtkn](https://github.com/suzuki-shunsuke/ghtkn), you can enable the integration.
+
+```sh
+export GHAPERF_GHTKN=true
+```
+
+## Cache
 
 ghaperf caches raw data of completed workflow runs and jobs in the cache directory `${XDG_CACHE_HOME:-${HOME}/.cache}/ghaperf/`.
+
+## :warning: Note
+
+ghaperf gets job logs by [GitHub API](https://docs.github.com/en/rest/actions/workflow-jobs#download-job-logs-for-a-workflow-run), but if jobs aren't completed or completed just now, the API would fail.
 
 ## Similar Works
 
