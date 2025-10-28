@@ -20,6 +20,12 @@ func (c *Collector) GetJob(ctx context.Context, logger *slog.Logger, input *Inpu
 	if err != nil {
 		return nil, fmt.Errorf("get a job: %w", err)
 	}
+	if job.GetStatus() != statusCompleted {
+		logger.Warn("job is not completed yet", "job_id", jobID, "job_name", job.GetName(), "job_status", job.GetStatus())
+		return &Job{
+			Job: job,
+		}, nil
+	}
 	jobLog, err := c.GetJobLog(ctx, input, jobID)
 	if err != nil {
 		return nil, fmt.Errorf("get a job log: %w", err)

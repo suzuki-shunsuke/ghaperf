@@ -135,13 +135,18 @@ func (r *Collector) getAndCacheJobs(ctx context.Context, logger *slog.Logger, in
 	}
 	arr := make([]*Job, len(jobs))
 	for i, job := range jobs {
+		logArgs := []any{"job_id", job.GetID(), "job_name", job.GetName(), "job_status", job.GetStatus()}
+		if job.GetStatus() != statusCompleted {
+			logger.Warn("exclude a not completed job", logArgs...)
+			continue
+		}
 		jobLog, err := r.GetJobLog(ctx, input, job.GetID())
 		if err != nil {
-			return nil, fmt.Errorf("get a job log: %w", slogerr.With(err, "job_id", job.GetID(), "job_name", job.GetName(), "job_status", job.GetStatus()))
+			return nil, fmt.Errorf("get a job log: %w", slogerr.With(err, logArgs...))
 		}
 		groups, err := parser.Parse(logger, bytes.NewBuffer(jobLog))
 		if err != nil {
-			return nil, fmt.Errorf("parse a job log: %w", slogerr.With(err, "job_id", job.GetID(), "job_name", job.GetName(), "job_status", job.GetStatus()))
+			return nil, fmt.Errorf("parse a job log: %w", slogerr.With(err, logArgs...))
 		}
 		arr[i] = &Job{
 			Job:    job,
