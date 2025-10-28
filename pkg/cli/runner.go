@@ -53,11 +53,11 @@ func Run(ctx context.Context, logger *slog.Logger, logLevel *slog.LevelVar, arg 
 	parseFlags(inputRun)
 
 	if inputRun.Help {
-		fmt.Fprintf(arg.Stderr, help, arg.Version)
+		fmt.Fprintf(arg.Stdout, help, arg.Version)
 		return nil
 	}
 	if inputRun.Version {
-		fmt.Fprintf(arg.Stderr, "%s\n", arg.Version)
+		fmt.Fprintf(arg.Stdout, "%s\n", arg.Version)
 		return nil
 	}
 
