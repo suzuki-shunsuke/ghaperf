@@ -17,7 +17,6 @@ OPTIONS:
    --repo <owner>/<repo>                          Specify the repository
    --run-id <run id>                              Specify the run ID
    --job-id <job id>                              Specify the job ID
-   --step-name <regular expression of step name>  Specify the step name
    --threshold <time duration> 				      Specify the threshold duration (e.g., 30s, 1m)
    --log-file <file path>						  Specify the job log file path
    --help, -h                                     Show help

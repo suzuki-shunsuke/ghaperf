@@ -24,7 +24,6 @@ type InputRun struct {
 	Repo        string
 	RunID       int64
 	JobID       int64
-	StepName    string
 	Threshold   string
 	LogFile     string
 	Args        []string
@@ -38,8 +37,6 @@ const (
 	envGhaperfGitHubToken = "GHAPERF_GITHUB_TOKEN" //nolint:gosec
 	envEnableGHTKN        = "GHAPERF_GHTKN"
 	envGhaperfThreshold   = "GHAPERF_THRESHOLD"
-	envGitHubRunID        = "GITHUB_RUN_ID"
-	envGitHubRepository   = "GITHUB_REPOSITORY"
 	envGitHubToken        = "GITHUB_TOKEN" //nolint:gosec
 )
 
@@ -53,93 +50,73 @@ type Arg struct {
 	Home    string
 }
 
-func (c *Controller) Run(ctx context.Context, logger *slog.Logger, logLevelVar *slog.LevelVar, input *InputRun, arg *Arg) error {
-	if err := setLogLevel(logLevelVar, input.LogLevel, arg.Getenv); err != nil {
+func (c *Controller) Run(ctx context.Context, logger *slog.Logger, logLevelVar *slog.LevelVar, inputRun *InputRun, arg *Arg) error {
+	if err := setLogLevel(logLevelVar, inputRun.LogLevel, arg.Getenv); err != nil {
 		return err
 	}
-
-	if err := setEnableGHTKN(input, arg.Getenv); err != nil {
-		return err
-	}
-
-	threshold, err := getThreshold(input.Threshold, arg.Getenv)
+	input, err := c.getInput(inputRun, arg)
 	if err != nil {
 		return err
 	}
 
-	if input.LogFile != "" {
-		if err := runner.NewRunner(nil, arg.Stdout, arg.Fs).RunWithLogFile(logger, &collector.Input{
-			Threshold: threshold,
-			LogFile:   input.LogFile,
-		}); err != nil {
+	if inputRun.LogFile != "" {
+		if err := runner.NewRunner(nil, arg.Stdout, arg.Fs).RunWithLogFile(logger, input); err != nil {
 			return fmt.Errorf("run with log file: %w", err)
 		}
 		return nil
 	}
 
-	job, err := getJobArg(input, arg)
-	if err != nil {
-		return err
-	}
-
 	gh, err := github.New(ctx, logger, &github.InputNew{
-		GHTKNEnabled: input.EnableGHTKN,
+		GHTKNEnabled: inputRun.EnableGHTKN,
 		AccessToken:  getGitHubToken(arg.Getenv),
 	})
 	if err != nil {
 		return fmt.Errorf("create GitHub client: %w", err)
 	}
-	if err := runner.NewRunner(gh, arg.Stdout, arg.Fs).Run(ctx, logger, &collector.Input{
-		Threshold: threshold,
-		CacheDir:  xdg.CacheDir(arg.Getenv, arg.Home),
-		RepoOwner: job.RepoOwner,
-		RepoName:  job.RepoName,
-		RunID:     job.RunID,
-		JobID:     job.ID,
-	}); err != nil {
+	if err := runner.NewRunner(gh, arg.Stdout, arg.Fs).Run(ctx, logger, input); err != nil {
 		return err //nolint:wrapcheck
 	}
 	return nil
 }
 
-type Job struct {
-	ID        int64
-	RepoOwner string
-	RepoName  string
-	RunID     int64
-}
+func (c *Controller) getInput(input *InputRun, arg *Arg) (*collector.Input, error) {
+	if err := setEnableGHTKN(input, arg.Getenv); err != nil {
+		return nil, err
+	}
 
-func getJobArg(input *InputRun, arg *Arg) (*Job, error) {
-	runID, err := getRunID(input.RunID, arg.Getenv)
+	threshold, err := getThreshold(input.Threshold, arg.Getenv)
 	if err != nil {
 		return nil, err
 	}
-	if runID == 0 && input.JobID == 0 {
+
+	if input.LogFile != "" {
+		return &collector.Input{
+			Threshold: threshold,
+			LogFile:   input.LogFile,
+		}, nil
+	}
+
+	if input.RunID == 0 && input.JobID == 0 {
 		return nil, errors.New("one of --run-id, --job-id, and --log-file must be specified")
 	}
 
-	repoFullName := getRepoFullName(input.Repo, arg.Getenv)
-	if repoFullName == "" {
+	if input.Repo == "" {
 		return nil, errors.New("without --log-file, repository must be specified")
 	}
 
-	repoOwner, repoName, err := validateRepo(repoFullName)
+	repoOwner, repoName, err := validateRepo(input.Repo)
 	if err != nil {
 		return nil, err
 	}
-	return &Job{
-		ID:        input.JobID,
-		RunID:     runID,
+
+	return &collector.Input{
+		Threshold: threshold,
+		CacheDir:  xdg.CacheDir(arg.Getenv, arg.Home),
 		RepoOwner: repoOwner,
 		RepoName:  repoName,
+		RunID:     input.RunID,
+		JobID:     input.JobID,
 	}, nil
-}
-
-func getRepoFullName(s string, getEnv func(string) string) string {
-	if s != "" {
-		return s
-	}
-	return getEnv(envGitHubRepository)
 }
 
 const defaultThreshold = 30 * time.Second
@@ -154,21 +131,6 @@ func getThreshold(s string, getEnv func(string) string) (time.Duration, error) {
 		return 0, fmt.Errorf("invalid threshold. See https://pkg.go.dev/time#ParseDuration: %w", err)
 	}
 	return d, nil
-}
-
-func getRunID(runID int64, getEnv func(string) string) (int64, error) {
-	if runID != 0 {
-		return runID, nil
-	}
-	s := getEnv(envGitHubRunID)
-	if s == "" {
-		return 0, nil
-	}
-	id, err := strconv.ParseInt(s, 10, 64)
-	if err != nil {
-		return 0, fmt.Errorf("%s must be int64: %w", envGitHubRunID, err)
-	}
-	return id, nil
 }
 
 func getThresholdStr(s string, getEnv func(string) string) string {
