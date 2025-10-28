@@ -75,7 +75,7 @@ func (c *Controller) Run(ctx context.Context, logger *slog.Logger, logLevelVar *
 		return nil
 	}
 
-	job, err := getJobArg(input, arg)
+	job, err := getJobArg(input)
 	if err != nil {
 		return err
 	}
@@ -92,8 +92,8 @@ func (c *Controller) Run(ctx context.Context, logger *slog.Logger, logLevelVar *
 		CacheDir:  xdg.CacheDir(arg.Getenv, arg.Home),
 		RepoOwner: job.RepoOwner,
 		RepoName:  job.RepoName,
-		RunID:     job.RunID,
-		JobID:     job.ID,
+		RunID:     input.RunID,
+		JobID:     input.JobID,
 	}); err != nil {
 		return err //nolint:wrapcheck
 	}
@@ -101,13 +101,11 @@ func (c *Controller) Run(ctx context.Context, logger *slog.Logger, logLevelVar *
 }
 
 type Job struct {
-	ID        int64
 	RepoOwner string
 	RepoName  string
-	RunID     int64
 }
 
-func getJobArg(input *InputRun, arg *Arg) (*Job, error) {
+func getJobArg(input *InputRun) (*Job, error) {
 	if input.RunID == 0 && input.JobID == 0 {
 		return nil, errors.New("one of --run-id, --job-id, and --log-file must be specified")
 	}
@@ -121,8 +119,6 @@ func getJobArg(input *InputRun, arg *Arg) (*Job, error) {
 		return nil, err
 	}
 	return &Job{
-		ID:        input.JobID,
-		RunID:     input.RunID,
 		RepoOwner: repoOwner,
 		RepoName:  repoName,
 	}, nil
