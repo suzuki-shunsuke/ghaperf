@@ -23,7 +23,6 @@ OPTIONS:
    --repo <owner>/<repo>                          Specify the repository
    --run-id <run id>                              Specify the run ID
    --job-id <job id>                              Specify the job ID
-   --step-name <regular expression of step name>  Specify the step name
    --threshold <time duration> 				      Specify the threshold duration (e.g., 30s, 1m)
    --log-file <file path>						  Specify the job log file path
    --help, -h                                     Show help
@@ -38,7 +37,6 @@ func parseFlags(f *controller.InputRun) {
 	pflag.StringVar(&f.Repo, "repo", "", "repository (owner/repo)")
 	pflag.Int64Var(&f.RunID, "run-id", 0, "run ID")
 	pflag.Int64Var(&f.JobID, "job-id", 0, "job ID")
-	pflag.StringVar(&f.StepName, "step-name", "", "step name")
 	pflag.StringVar(&f.Threshold, "threshold", "", "threshold")
 	pflag.StringVar(&f.LogFile, "log-file", "", "log file")
 	pflag.BoolVar(&f.EnableGHTKN, "ghtkn", false, "Enable the integration with ghtkn")

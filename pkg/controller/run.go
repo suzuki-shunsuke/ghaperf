@@ -24,7 +24,6 @@ type InputRun struct {
 	Repo        string
 	RunID       int64
 	JobID       int64
-	StepName    string
 	Threshold   string
 	LogFile     string
 	Args        []string
