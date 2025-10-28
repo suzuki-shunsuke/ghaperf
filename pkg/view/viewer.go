@@ -46,18 +46,14 @@ func (s *Step) Duration() time.Duration {
 }
 
 func (s *Step) Contain(group *parser.Group, threshold time.Duration) {
-	if s.EndTime.Add(500 * time.Millisecond).Before(group.StartTime) { //nolint:mnd
-		// The step ends before the group starts
-		// Go to the next step
-		return
-	}
 	if group.Duration() < threshold {
 		// The group is not slow
 		// Go to the next group
 		return
 	}
-	if s.StartTime.Add(-500*time.Millisecond).Before(group.StartTime) && s.EndTime.Add(500*time.Millisecond).After(group.EndTime) { //nolint:mnd
-		// The step overlaps with the group
+	centerTime := s.StartTime.Add(s.Duration() / 2) //nolint:mnd
+	if group.StartTime.Before(centerTime) && group.EndTime.After(centerTime) {
+		// The group is contained in the step
 		s.Groups = append(s.Groups, group)
 		return
 	}
