@@ -29,11 +29,6 @@ Steps Overhead: 0s
 3. 1s: Set up job
 ```
 
-## :warning: This Project Is Still Work In Progress
-
-This project is still work in progress.
-Probably CLI doesn't work yet, and the document may be wrong.
-
 ## Why?
 
 [There are some awesome tools](#similar-works), but they can't retrieve step-level data inside composite actions because [the Workflow Jobs APIs](https://docs.github.com/en/rest/actions/workflow-jobs) don’t include those data.
@@ -117,6 +112,10 @@ Or if you use [ghtkn](https://github.com/suzuki-shunsuke/ghtkn), you can enable 
 ```sh
 export GHAPERF_GHTKN=true
 ```
+
+## Usage
+
+[Please see here.](USAGE.md)
 
 ## Cache
 
