@@ -79,7 +79,7 @@ func (r *Collector) getRun(ctx context.Context, logger *slog.Logger, input *Inpu
 }
 
 func (r *Collector) getAndCacheRun(ctx context.Context, logger *slog.Logger, input *Input, cachePath string) (*github.WorkflowRun, error) {
-	run, err := r.gh.GetWorkflowRunByID(ctx, input.RepoOwner, input.RepoName, input.RunID)
+	run, err := r.gh.GetWorkflowRunByID(ctx, input.RepoOwner, input.RepoName, input.RunID, input.AttemptNumber)
 	if err != nil {
 		return nil, fmt.Errorf("get workflow run by ID: %w", err)
 	}
@@ -119,7 +119,7 @@ func (r *Collector) getJobs(ctx context.Context, logger *slog.Logger, input *Inp
 
 func (r *Collector) getAndCacheJobs(ctx context.Context, logger *slog.Logger, input *Input, jobIDsPath string, run *github.WorkflowRun) ([]*Job, error) {
 	// cache not found
-	jobs, err := r.gh.ListWorkflowJobs(ctx, input.RepoOwner, input.RepoName, input.RunID)
+	jobs, err := r.gh.ListWorkflowJobs(ctx, input.RepoOwner, input.RepoName, input.RunID, input.AttemptNumber)
 	if err != nil {
 		return nil, fmt.Errorf("get workflow run by ID: %w", err)
 	}
