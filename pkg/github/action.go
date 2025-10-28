@@ -57,7 +57,7 @@ func (c *Client) GetWorkflowJobLogs(ctx context.Context, owner, repo string, job
 		if err != nil {
 			return nil, fmt.Errorf("read error response body: %w", slogerr.With(err, "status_code", resp.StatusCode))
 		}
-		return nil, fmt.Errorf("download workflow job logs: status code: %w", slogerr.With(errInvalidStatusCode, "status_code", resp.StatusCode, "response_body", string(b)))
+		return nil, fmt.Errorf("download workflow job logs: %w", slogerr.With(errInvalidStatusCode, "status_code", resp.StatusCode, "response_body", string(b)))
 	}
 	return resp.Body, nil
 }

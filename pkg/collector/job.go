@@ -13,6 +13,7 @@ import (
 	"github.com/suzuki-shunsuke/ghaperf/pkg/github"
 	"github.com/suzuki-shunsuke/ghaperf/pkg/parser"
 	"github.com/suzuki-shunsuke/ghaperf/pkg/xdg"
+	"github.com/suzuki-shunsuke/slog-error/slogerr"
 )
 
 func (c *Collector) GetJob(ctx context.Context, logger *slog.Logger, input *Input, jobID int64) (*Job, error) {
@@ -20,19 +21,27 @@ func (c *Collector) GetJob(ctx context.Context, logger *slog.Logger, input *Inpu
 	if err != nil {
 		return nil, fmt.Errorf("get a job: %w", err)
 	}
+	logArgs := []any{"job_name", job.GetName(), "job_status", job.GetStatus()}
 	if job.GetStatus() != statusCompleted {
-		logger.Warn("job is not completed yet", "job_id", jobID, "job_name", job.GetName(), "job_status", job.GetStatus())
+		logger.Warn("job is not completed yet", logArgs...)
 		return &Job{
 			Job: job,
 		}, nil
 	}
 	jobLog, err := c.GetJobLog(ctx, input, jobID)
 	if err != nil {
-		return nil, fmt.Errorf("get a job log: %w", err)
+		slogerr.WithError(logger, err).Error("get a job log", logArgs...)
+		return &Job{
+			Job: job,
+		}, nil
 	}
 	groups, err := parser.Parse(logger, bytes.NewBuffer(jobLog))
 	if err != nil {
-		return nil, fmt.Errorf("parse log: %w", err)
+		slogerr.WithError(logger, err).Error("parse a job log", logArgs...)
+		return &Job{
+			Job:    job,
+			Groups: groups,
+		}, nil
 	}
 	return &Job{
 		Job:    job,

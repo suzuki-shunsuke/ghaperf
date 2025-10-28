@@ -142,11 +142,15 @@ func (r *Collector) getAndCacheJobs(ctx context.Context, logger *slog.Logger, in
 		}
 		jobLog, err := r.GetJobLog(ctx, input, job.GetID())
 		if err != nil {
-			return nil, fmt.Errorf("get a job log: %w", slogerr.With(err, logArgs...))
+			slogerr.WithError(logger, err).Error("get a job log", logArgs...)
+			arr[i] = &Job{
+				Job: job,
+			}
+			continue
 		}
 		groups, err := parser.Parse(logger, bytes.NewBuffer(jobLog))
 		if err != nil {
-			return nil, fmt.Errorf("parse a job log: %w", slogerr.With(err, logArgs...))
+			slogerr.WithError(logger, err).Error("parse a job log", logArgs...)
 		}
 		arr[i] = &Job{
 			Job:    job,
