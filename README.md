@@ -39,9 +39,7 @@ Note that the specification of log format isn't published, so ghaperf may fail t
 
 ## Install
 
-```sh
-go install github.com/suzuki-shunsuke/ghaperf/cmd/ghaperf@latest
-```
+[Please see INSTALL.md.](INSTALL.md)
 
 ## Getting Started
 
