@@ -24,5 +24,5 @@ OPTIONS:
    --version, -v                                  Show version
 
 VERSION:
-   v0.0.1-0
+   0.0.1
 ```
