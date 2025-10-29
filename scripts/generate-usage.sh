@@ -5,7 +5,6 @@ set -eu
 cd "$(dirname "$0")/.."
 
 help=$(ghaperf --help)
-
 block='```'
 
 echo "# Usage
