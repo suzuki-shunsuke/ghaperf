@@ -20,6 +20,7 @@ type GitHub interface {
 	GetWorkflowJobLogs(ctx context.Context, owner, repo string, jobID int64) (io.ReadCloser, error)
 	GetWorkflowRunByID(ctx context.Context, owner, repo string, runID int64, attempt int) (*github.WorkflowRun, error)
 	ListWorkflowJobs(ctx context.Context, owner, repo string, runID int64, attempt int) ([]*github.WorkflowJob, error)
+	ListWorkflowRuns(ctx context.Context, owner, repo string, fileName string, maxCount int, opts *github.ListWorkflowRunsOptions) ([]*github.WorkflowRun, error)
 }
 
 func New(fs afero.Fs, gh GitHub) *Collector {
@@ -30,15 +31,17 @@ func New(fs afero.Fs, gh GitHub) *Collector {
 }
 
 type Input struct {
-	Threshold     time.Duration
-	LogFile       string
-	Data          string
-	CacheDir      string
-	RepoOwner     string
-	RepoName      string
-	RunID         int64
-	JobID         int64
-	AttemptNumber int
+	Threshold               time.Duration
+	LogFile                 string
+	CacheDir                string
+	RepoOwner               string
+	RepoName                string
+	RunID                   int64
+	JobID                   int64
+	AttemptNumber           int
+	WorkflowNumber          int
+	WorkflowName            string
+	ListWorkflowRunsOptions *github.ListWorkflowRunsOptions
 }
 
 type Job struct {

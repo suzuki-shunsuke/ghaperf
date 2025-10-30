@@ -7,6 +7,7 @@ import (
 
 	"github.com/spf13/pflag"
 	"github.com/suzuki-shunsuke/ghaperf/pkg/controller"
+	"github.com/suzuki-shunsuke/ghaperf/pkg/github"
 )
 
 const help = `ghaperf - Analyze the performance of GitHub Actions using GitHub API and raw job logs
@@ -18,22 +19,32 @@ USAGE:
    ghaperf [OPTIONS]
 
 OPTIONS:
-   --log-level <debug|info|warn|error>            Set log level (or set GHIR_LOG_LEVEL)
-   --ghtkn                                        Enable the integration with ghtkn (or set GHAPERF_GHTKN)
-   --repo <owner>/<repo>                          Specify the repository
-   --run-id <run id>                              Specify the run ID
-   --job-id <job id>                              Specify the job ID
-   --attempt-number <attempt number>              Specify the workflow run's attempt number
-   --threshold <time duration> 				      Specify the threshold duration (e.g., 30s, 1m)
-   --log-file <file path>						  Specify the job log file path
-   --help, -h                                     Show help
-   --version, -v                                  Show version
+   --log-level <debug|info|warn|error>  Log level (or set GHIR_LOG_LEVEL)
+   --ghtkn                              Enable the integration with ghtkn (or set GHAPERF_GHTKN)
+   --repo <owner>/<repo>                The repository
+   --run-id <run id>                    The run ID
+   --job-id <job id>                    The job ID
+   --attempt-number <attempt number>    The workflow run's attempt number
+   --threshold <time duration>          The threshold duration (e.g., 30s, 1m)
+   --log-file <file path>               Log file path
+   -N <the number of workflow runs>     The number of workflow runs to analyze (default: 100)
+   --workflow <workflow name>           The workflow name
+   --workflow-actor <actor>             The workflow run actor
+   --workflow-branch <branch>           The workflow run branch
+   --workflow-event <event>             The workflow run event
+   --workflow-created <date range>      The workflow run created date range
+   --workflow-status <status>           The workflow run status
+   --help, -h                           Show help
+   --version, -v                        Show version
 
 VERSION:
    %s
 `
 
 func parseFlags(f *controller.InputRun) {
+	if f.ListWorkflowRunsOptions == nil {
+		f.ListWorkflowRunsOptions = &github.ListWorkflowRunsOptions{}
+	}
 	pflag.StringVar(&f.LogLevel, "log-level", "", "log level (debug, info, warn, error)")
 	pflag.StringVar(&f.Repo, "repo", "", "repository (owner/repo)")
 	pflag.Int64Var(&f.RunID, "run-id", 0, "run ID")
@@ -44,6 +55,14 @@ func parseFlags(f *controller.InputRun) {
 	pflag.BoolVar(&f.EnableGHTKN, "ghtkn", false, "Enable the integration with ghtkn")
 	pflag.BoolVarP(&f.Help, "help", "h", false, "Show help")
 	pflag.BoolVarP(&f.Version, "version", "v", false, "Show version")
+	pflag.IntVar(&f.WorkflowNumber, "count", 100, "the number of workflow runs") //nolint:mnd
+	pflag.StringVar(&f.WorkflowName, "workflow", "", "the workflow name")
+	pflag.StringVar(&f.ListWorkflowRunsOptions.Actor, "workflow-actor", "", "the workflow run actor")
+	pflag.StringVar(&f.ListWorkflowRunsOptions.Branch, "workflow-branch", "", "the workflow run branch")
+	pflag.StringVar(&f.ListWorkflowRunsOptions.Event, "workflow-event", "", "the workflow run event")
+	pflag.StringVar(&f.ListWorkflowRunsOptions.Created, "workflow-created", "", "the workflow run created date range")
+	pflag.StringVar(&f.ListWorkflowRunsOptions.Status, "workflow-status", "", "the workflow run status")
+
 	pflag.Parse()
 	f.Args = pflag.Args()
 }

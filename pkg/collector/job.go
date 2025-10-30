@@ -21,7 +21,7 @@ func (c *Collector) GetJob(ctx context.Context, logger *slog.Logger, input *Inpu
 	if err != nil {
 		return nil, fmt.Errorf("get a job: %w", err)
 	}
-	logArgs := []any{"job_name", job.GetName(), "job_status", job.GetStatus()}
+	logArgs := []any{"job_name", job.GetName(), "job_status", job.GetStatus(), "job_conclusion", job.GetConclusion()}
 	if job.GetStatus() != statusCompleted {
 		logger.Warn("job is not completed yet", logArgs...)
 		return &Job{

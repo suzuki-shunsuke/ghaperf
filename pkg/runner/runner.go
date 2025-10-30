@@ -28,18 +28,21 @@ type GitHub interface {
 	GetWorkflowJobLogs(ctx context.Context, owner, repo string, jobID int64) (io.ReadCloser, error)
 	GetWorkflowRunByID(ctx context.Context, owner, repo string, runID int64, attempt int) (*github.WorkflowRun, error)
 	ListWorkflowJobs(ctx context.Context, owner, repo string, runID int64, attempt int) ([]*github.WorkflowJob, error)
+	ListWorkflowRuns(ctx context.Context, owner, repo string, fileName string, maxCount int, opts *github.ListWorkflowRunsOptions) ([]*github.WorkflowRun, error)
 }
 
 type Viewer interface {
 	ShowJob(job *collector.Job, threshold time.Duration)
 	ShowGroups(groups []*parser.Group, threshold time.Duration)
 	ShowJobs(run *github.WorkflowRun, jobs []*collector.Job, threshold time.Duration)
+	ShowRuns(runs []*collector.WorkflowRun, threshold time.Duration)
 }
 
 type Collector interface {
 	GetJobLog(ctx context.Context, input *collector.Input, jobID int64) ([]byte, error)
 	GetJob(ctx context.Context, logger *slog.Logger, input *collector.Input, jobID int64) (*collector.Job, error)
 	GetRun(ctx context.Context, logger *slog.Logger, input *collector.Input) (*github.WorkflowRun, []*collector.Job, error)
+	ListRuns(ctx context.Context, logger *slog.Logger, input *collector.Input, maxCount int) ([]*collector.WorkflowRun, error)
 }
 
 func NewRunner(gh GitHub, stdout io.Writer, fs afero.Fs) *Runner {
@@ -61,7 +64,10 @@ func (r *Runner) Run(ctx context.Context, logger *slog.Logger, input *collector.
 		r.viewer.ShowJob(job, input.Threshold)
 		return nil
 	}
-	return r.runWithRunID(ctx, logger, input)
+	if input.RunID != 0 {
+		return r.runWithRunID(ctx, logger, input)
+	}
+	return r.runs(ctx, logger, input)
 }
 
 func (r *Runner) RunWithLogFile(logger *slog.Logger, input *collector.Input) error {

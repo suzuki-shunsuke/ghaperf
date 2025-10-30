@@ -20,17 +20,20 @@ import (
 )
 
 type InputRun struct {
-	LogLevel      string
-	Repo          string
-	AttemptNumber int
-	RunID         int64
-	JobID         int64
-	Threshold     string
-	LogFile       string
-	Args          []string
-	EnableGHTKN   bool
-	Help          bool
-	Version       bool
+	LogLevel                string
+	Repo                    string
+	AttemptNumber           int
+	RunID                   int64
+	JobID                   int64
+	Threshold               string
+	LogFile                 string
+	Args                    []string
+	EnableGHTKN             bool
+	Help                    bool
+	Version                 bool
+	ListWorkflowRunsOptions *github.ListWorkflowRunsOptions
+	WorkflowNumber          int
+	WorkflowName            string
 }
 
 const (
@@ -97,8 +100,8 @@ func (c *Controller) getInput(input *InputRun, arg *Arg) (*collector.Input, erro
 		}, nil
 	}
 
-	if input.RunID == 0 && input.JobID == 0 {
-		return nil, errors.New("one of --run-id, --job-id, and --log-file must be specified")
+	if input.RunID == 0 && input.JobID == 0 && input.WorkflowName == "" {
+		return nil, errors.New("one of --run-id, --job-id, --log-file, and --workflow must be specified")
 	}
 
 	if input.Repo == "" {
@@ -111,13 +114,16 @@ func (c *Controller) getInput(input *InputRun, arg *Arg) (*collector.Input, erro
 	}
 
 	return &collector.Input{
-		Threshold:     threshold,
-		CacheDir:      xdg.CacheDir(arg.Getenv, arg.Home),
-		RepoOwner:     repoOwner,
-		RepoName:      repoName,
-		RunID:         input.RunID,
-		JobID:         input.JobID,
-		AttemptNumber: input.AttemptNumber,
+		Threshold:               threshold,
+		CacheDir:                xdg.CacheDir(arg.Getenv, arg.Home),
+		RepoOwner:               repoOwner,
+		RepoName:                repoName,
+		RunID:                   input.RunID,
+		JobID:                   input.JobID,
+		AttemptNumber:           input.AttemptNumber,
+		WorkflowNumber:          input.WorkflowNumber,
+		WorkflowName:            input.WorkflowName,
+		ListWorkflowRunsOptions: input.ListWorkflowRunsOptions,
 	}, nil
 }
 

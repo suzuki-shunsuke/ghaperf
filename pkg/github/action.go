@@ -11,6 +11,8 @@ import (
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
 )
 
+const maxPerPage = 100
+
 type ActionsService interface {
 	GetWorkflowJobByID(ctx context.Context, owner, repo string, jobID int64) (*WorkflowJob, *Response, error)
 	GetWorkflowJobLogs(ctx context.Context, owner, repo string, jobID int64, maxRedirects int) (*url.URL, *Response, error)
@@ -18,6 +20,7 @@ type ActionsService interface {
 	GetWorkflowRunAttempt(ctx context.Context, owner, repo string, runID int64, attemptNumber int, opts *WorkflowRunAttemptOptions) (*WorkflowRun, *Response, error)
 	ListWorkflowJobs(ctx context.Context, owner, repo string, runID int64, opts *ListWorkflowJobsOptions) (*Jobs, *Response, error)
 	ListWorkflowJobsAttempt(ctx context.Context, owner, repo string, runID, attemptNumber int64, opts *ListOptions) (*Jobs, *Response, error)
+	ListWorkflowRunsByFileName(ctx context.Context, owner, repo, workflowFileName string, opts *ListWorkflowRunsOptions) (*WorkflowRuns, *Response, error)
 }
 
 func (c *Client) GetWorkflowJobByID(ctx context.Context, owner, repo string, jobID int64) (*WorkflowJob, error) {
@@ -77,7 +80,7 @@ func (c *Client) ListWorkflowJobs(ctx context.Context, owner, repo string, runID
 	list := c.getListJobsFunc(attempt)
 	opts := &ListWorkflowJobsOptions{
 		ListOptions: ListOptions{
-			PerPage: 100, //nolint:mnd
+			PerPage: maxPerPage,
 		},
 	}
 	arr := []*WorkflowJob{}
@@ -96,12 +99,11 @@ func (c *Client) ListWorkflowJobs(ctx context.Context, owner, repo string, runID
 }
 
 func (c *Client) getListJobsFunc(attempt int) func(ctx context.Context, owner, repo string, runID int64, page int) (*Jobs, *Response, error) {
-	const perPage = 100
 	if attempt > 0 {
 		return func(ctx context.Context, owner, repo string, runID int64, page int) (*Jobs, *Response, error) {
 			return c.actions.ListWorkflowJobsAttempt(ctx, owner, repo, runID, int64(attempt), &ListOptions{
 				Page:    page,
-				PerPage: perPage,
+				PerPage: maxPerPage,
 			})
 		}
 	}
@@ -109,8 +111,43 @@ func (c *Client) getListJobsFunc(attempt int) func(ctx context.Context, owner, r
 		return c.actions.ListWorkflowJobs(ctx, owner, repo, runID, &ListWorkflowJobsOptions{
 			ListOptions: ListOptions{
 				Page:    page,
-				PerPage: perPage,
+				PerPage: maxPerPage,
 			},
 		})
 	}
+}
+
+func (c *Client) ListWorkflowRuns(ctx context.Context, owner, repo string, fileName string, maxCount int, opts *ListWorkflowRunsOptions) ([]*WorkflowRun, error) {
+	o := &ListWorkflowRunsOptions{
+		Actor:               opts.Actor,
+		Branch:              opts.Branch,
+		Event:               opts.Event,
+		Status:              opts.Status,
+		Created:             opts.Created,
+		HeadSHA:             opts.HeadSHA,
+		ExcludePullRequests: opts.ExcludePullRequests,
+		CheckSuiteID:        opts.CheckSuiteID,
+		ListOptions: ListOptions{
+			PerPage: maxPerPage,
+		},
+	}
+	if maxCount < maxPerPage {
+		o.PerPage = maxCount
+	}
+	arr := []*WorkflowRun{}
+	for range 10 { // max 1000 jobs
+		runs, resp, err := c.actions.ListWorkflowRunsByFileName(ctx, owner, repo, fileName, o)
+		if err != nil {
+			return nil, fmt.Errorf("list workflow runs: %w", err)
+		}
+		arr = append(arr, runs.WorkflowRuns...)
+		if resp.NextPage == 0 {
+			return arr, nil
+		}
+		if len(arr) >= maxCount {
+			return arr[:maxCount], nil
+		}
+		o.Page = resp.NextPage
+	}
+	return arr, nil
 }
