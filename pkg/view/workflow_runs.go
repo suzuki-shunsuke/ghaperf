@@ -43,6 +43,9 @@ func (v *Viewer) ShowRuns(runs []*collector.WorkflowRun, threshold time.Duration
 	jobMetrics := map[string]*JobMetric{}
 	for _, run := range runs {
 		for _, job := range run.Jobs {
+			if job.Job.GetStatus() != "completed" {
+				continue
+			}
 			// TODO normalize job name for matrix jobs
 			jobName := job.Job.GetName()
 			jm, ok := jobMetrics[jobName]
