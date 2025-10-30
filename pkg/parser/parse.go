@@ -53,11 +53,33 @@ import (
 */
 
 type Group struct {
-	Name      string    `json:"name"`
-	StartTime time.Time `json:"start_time"`
-	EndTime   time.Time `json:"end_time"`
+	Name      string
+	Lines     []*Line
 	duration  time.Duration
-	Lines     []*Line `json:"lines"`
+	startTime time.Time
+	endTime   time.Time
+}
+
+func (g *Group) StartTime() time.Time {
+	if g == nil || len(g.Lines) == 0 {
+		return time.Time{}
+	}
+	if !g.startTime.IsZero() {
+		return g.startTime
+	}
+	g.startTime = g.Lines[0].Timestamp
+	return g.startTime
+}
+
+func (g *Group) EndTime() time.Time {
+	if g == nil || len(g.Lines) == 0 {
+		return time.Time{}
+	}
+	if !g.endTime.IsZero() {
+		return g.endTime
+	}
+	g.endTime = g.Lines[len(g.Lines)-1].Timestamp
+	return g.endTime
 }
 
 func (g *Group) Duration() time.Duration {
@@ -67,16 +89,17 @@ func (g *Group) Duration() time.Duration {
 	if g.duration != 0 {
 		return g.duration
 	}
-	if g.EndTime.IsZero() {
+	endTime := g.EndTime()
+	if endTime.IsZero() {
 		return 0
 	}
-	g.duration = g.EndTime.Sub(g.StartTime)
+	g.duration = endTime.Sub(g.StartTime())
 	return g.duration
 }
 
 type Line struct {
-	Timestamp time.Time `json:"timestamp"`
-	Content   string    `json:"content"`
+	Timestamp time.Time
+	Content   string
 	Start     bool
 	Continue  bool
 	JobName   string
@@ -98,7 +121,7 @@ func (l *Log) Duration() time.Duration {
 	if len(l.Groups) == 0 {
 		return 0
 	}
-	l.duration = l.Groups[len(l.Groups)-1].EndTime.Sub(l.Groups[0].StartTime)
+	l.duration = l.Groups[len(l.Groups)-1].EndTime().Sub(l.Groups[0].StartTime())
 	return l.duration
 }
 
@@ -120,13 +143,11 @@ func Parse(data io.Reader) (*Log, error) {
 		group.Lines = append(group.Lines, line)
 		if line.Start {
 			// End the previous group
-			group.EndTime = line.Timestamp
 			log.Groups = append(log.Groups, group)
-			group = &Group{}
+			group = &Group{
+				Name: line.Content,
+			}
 		}
-	}
-	if group.EndTime.IsZero() {
-		group.EndTime = group.Lines[len(group.Lines)-1].Timestamp
 	}
 	log.Groups = append(log.Groups, group)
 
