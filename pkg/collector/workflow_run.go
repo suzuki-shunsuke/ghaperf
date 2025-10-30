@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"log/slog"
 	"maps"
 	"path/filepath"
@@ -48,76 +47,97 @@ func (r *Collector) getJobsAndLogs(ctx context.Context, logger *slog.Logger, inp
 	logCacheFile := xdg.RunLogCacheFile(input.CacheDir, input.RepoOwner, input.RepoName, run.GetID(), run.GetRunAttempt())
 	if f, err := afero.Exists(r.fs, logCacheFile); err == nil && f {
 		// exist cache
-		infos, err := afero.ReadDir(r.fs, logCacheDir)
-		if err != nil {
-			return nil, fmt.Errorf("read cached workflow run log dir: %w", err)
-		}
-		for _, info := range infos {
-			log, err := r.readLog(logCacheDir, info.Name())
-			if err != nil {
-				slogerr.WithError(logger, err).Error("parse a cached log file", "file_name", info.Name())
-				continue
-			}
-			job, ok := jobM[info.Name()]
-			if !ok {
-				continue
-			}
-			job.Groups = log.Groups
+		if err := r.readCachedLog(logger, logCacheDir, jobM); err != nil {
+			return nil, fmt.Errorf("read cached logs: %w", err)
 		}
 		return slices.Collect(maps.Values(jobM)), nil
 	}
 
+	if err := r.fs.MkdirAll(logCacheDir, dirPermission); err != nil {
+		return nil, fmt.Errorf("make dirs for cached workflow run log dir: %w", err)
+	}
 	files, err := r.gh.GetWorkflowRunLogs(ctx, input.RepoOwner, input.RepoName, run.GetID(), run.GetRunAttempt())
 	if err != nil {
 		return nil, fmt.Errorf("get workflow run logs: %w", err)
 	}
+	r.cacheAndParseLogs(logger, files, logCacheDir, logCacheFile, jobM)
+	return slices.Collect(maps.Values(jobM)), nil
+}
+
+func (r *Collector) cacheAndParseLogs(logger *slog.Logger, files []*zip.File, logCacheDir, logCacheFile string, jobM map[string]*Job) {
+	allCached := true
 	for _, file := range files {
-		log, err := r.cacheAndParseLog(logCacheDir, file)
+		cached, err := r.cacheAndParseLog(filepath.Join(logCacheDir, file.Name), file, jobM) //nolint:gosec
 		if err != nil {
-			slogerr.WithError(logger, err).Error("cache and parse a log file", "file_name", file.Name)
+			slogerr.WithError(logger, err).Error("parse a cached log file", "file_name", file.Name)
+		}
+		if !cached {
+			allCached = false
+		}
+	}
+	if allCached {
+		if err := afero.WriteFile(r.fs, logCacheFile, []byte{}, filePermission); err != nil {
+			slogerr.WithError(logger, err).Error("write cached workflow run log file")
+		}
+	}
+}
+
+func (r *Collector) cacheAndParseLog(cachePath string, file *zip.File, jobM map[string]*Job) (bool, error) {
+	if err := r.cacheLog(cachePath, file); err != nil {
+		return false, err
+	}
+	log, err := r.readLog(cachePath)
+	if err != nil {
+		return true, err
+	}
+	job, ok := jobM[log.JobName]
+	if !ok {
+		return true, nil
+	}
+	job.Groups = log.Groups
+	return true, nil
+}
+
+func (r *Collector) readCachedLog(logger *slog.Logger, logCacheDir string, jobM map[string]*Job) error {
+	infos, err := afero.ReadDir(r.fs, logCacheDir)
+	if err != nil {
+		return fmt.Errorf("read cached workflow run log dir: %w", err)
+	}
+	for _, info := range infos {
+		log, err := r.readLog(filepath.Join(logCacheDir, info.Name()))
+		if err != nil {
+			slogerr.WithError(logger, err).Error("parse a cached log file", "file_name", info.Name())
 			continue
 		}
-		job, ok := jobM[log.JobName]
+		job, ok := jobM[info.Name()]
 		if !ok {
 			continue
 		}
 		job.Groups = log.Groups
 	}
-
-	return slices.Collect(maps.Values(jobM)), nil
+	return nil
 }
 
-func (r *Collector) cacheAndParseLog(logCacheDir string, file *zip.File) (*parser.Log, error) {
+func (r *Collector) cacheLog(cachePath string, file *zip.File) error {
 	f, err := file.Open()
 	if err != nil {
-		return nil, fmt.Errorf("open a log file from workflow run logs: %w", err)
+		return fmt.Errorf("open a log file from workflow run logs: %w", err)
 	}
 	defer f.Close()
-	cachePath := filepath.Join(logCacheDir, file.Name)
 	cacheFile, err := r.fs.Create(cachePath)
 	if err != nil {
-		return nil, fmt.Errorf("create a cached log file: %w", err)
+		return fmt.Errorf("create a cached log file: %w", err)
 	}
 	defer cacheFile.Close()
 	// cache log
-	if _, err := io.Copy(cacheFile, f); err != nil {
-		return nil, fmt.Errorf("copy to a cached log file: %w", err)
+	if err := copySafe(cacheFile, f); err != nil {
+		return fmt.Errorf("cache a log file: %w", err)
 	}
-	a, err := r.fs.Open(cachePath)
-	if err != nil {
-		return nil, fmt.Errorf("open a cached log file: %w", err)
-	}
-	defer a.Close()
-	// parse log
-	log, err := parser.Parse(a)
-	if err != nil {
-		return nil, fmt.Errorf("parse a cached log file: %w", err)
-	}
-	return log, nil
+	return nil
 }
 
-func (r *Collector) readLog(logCacheDir, name string) (*parser.Log, error) {
-	f, err := r.fs.Open(filepath.Join(logCacheDir, name))
+func (r *Collector) readLog(cachePath string) (*parser.Log, error) {
+	f, err := r.fs.Open(cachePath)
 	if err != nil {
 		return nil, fmt.Errorf("open a cached log file: %w", err)
 	}

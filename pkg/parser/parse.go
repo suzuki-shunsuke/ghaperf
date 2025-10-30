@@ -139,7 +139,7 @@ func Parse(data io.Reader) (*Log, error) {
 
 var ansiEscapeSequence = regexp.MustCompile(`\x1b\[[0-9;]*[A-Za-z]`)
 
-func parseLine(txt string) *Line { //nolint:cyclop
+func parseLine(txt string) *Line {
 	txt = ansiEscapeSequence.ReplaceAllString(
 		strings.TrimPrefix(txt, "\ufeff"), "") // Remove BOM and ANSI escape sequences
 	d, l, ok := strings.Cut(txt, " ")
