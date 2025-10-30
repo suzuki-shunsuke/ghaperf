@@ -18,7 +18,7 @@ type JobWithSteps struct {
 func (v *Viewer) ShowJobs(run *github.WorkflowRun, jobs []*collector.Job, threshold time.Duration) {
 	arr := make([]*JobWithSteps, 0, len(jobs))
 	for _, job := range jobs {
-		d := jobDuration(job.Job)
+		d := job.Duration()
 		if d < threshold {
 			continue
 		}

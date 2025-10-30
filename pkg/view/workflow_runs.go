@@ -54,7 +54,7 @@ func (v *Viewer) ShowRuns(runs []*collector.WorkflowRun, threshold time.Duration
 				}
 				jobMetrics[jobName] = jm
 			}
-			jm.Metric.Add(jobDuration(job.Job))
+			jm.Metric.Add(job.Duration())
 
 			for _, s := range job.Job.Steps {
 				sm, ok := jm.Steps[s.GetName()]
@@ -87,16 +87,29 @@ func (v *Viewer) ShowRuns(runs []*collector.WorkflowRun, threshold time.Duration
 		}
 	}
 	jobArr := slices.Collect(maps.Values(jobMetrics))
-	sort.Slice(jobArr, func(i, j int) bool {
-		return jobArr[i].Metric.Sum > jobArr[j].Metric.Sum
-	})
+	arr := make([]*JobMetric, 0, len(jobArr))
 	for _, jm := range jobArr {
+		if jm.Metric.Avg < threshold {
+			continue
+		}
+		arr = append(arr, jm)
+	}
+	if len(arr) == 0 {
+		fmt.Fprintln(v.stdout, "There is no slow job")
+		return
+	}
+	sort.Slice(arr, func(i, j int) bool {
+		return arr[i].Metric.Sum > arr[j].Metric.Sum
+	})
+	for _, jm := range arr {
+		if jm.Metric.Avg < threshold {
+			continue
+		}
 		stepArr := slices.Collect(maps.Values(jm.Steps))
 		sort.Slice(stepArr, func(i, j int) bool {
 			return stepArr[i].Metric.Sum > stepArr[j].Metric.Sum
 		})
 		fmt.Fprintf(v.stdout, "## Job: %s\n", jm.Name)
-		fmt.Fprintf(v.stdout, "Job Name: %s\n", jm.Name)
 		fmt.Fprintf(v.stdout, "Total Job Duration: %s\n", jm.Metric.Sum.Round(time.Second))
 		fmt.Fprintf(v.stdout, "The number of Job Executions: %d\n", jm.Metric.Count)
 		fmt.Fprintf(v.stdout, "Average Job Duration: %s\n", jm.Metric.Avg.Round(time.Second))

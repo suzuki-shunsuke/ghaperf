@@ -47,6 +47,26 @@ type Input struct {
 }
 
 type Job struct {
-	Job    *github.WorkflowJob
-	Groups []*parser.Group
+	Job      *github.WorkflowJob
+	Groups   []*parser.Group
+	duration time.Duration
+}
+
+func (j *Job) Duration() time.Duration {
+	if j == nil || j.Job == nil {
+		return 0
+	}
+	if j.Job.GetConclusion() == "skipped" {
+		return 0
+	}
+	if j.duration != 0 {
+		return j.duration
+	}
+	completedAt := j.Job.GetCompletedAt().Time
+	startedAt := j.Job.GetStartedAt().Time
+	if completedAt.Before(startedAt) {
+		return 0
+	}
+	j.duration = completedAt.Sub(startedAt)
+	return j.duration
 }

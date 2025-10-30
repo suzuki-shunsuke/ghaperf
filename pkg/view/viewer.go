@@ -19,10 +19,6 @@ func New(stdout io.Writer) *Viewer {
 	}
 }
 
-func jobDuration(job *github.WorkflowJob) time.Duration {
-	return job.GetCompletedAt().Sub(job.GetStartedAt().Time)
-}
-
 type Step struct {
 	Name      string    `json:"name"`
 	StartTime time.Time `json:"start_time"`
