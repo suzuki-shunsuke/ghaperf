@@ -21,7 +21,7 @@ func (c *Collector) GetJob(ctx context.Context, logger *slog.Logger, input *Inpu
 	if err != nil {
 		return nil, fmt.Errorf("get a job: %w", err)
 	}
-	logArgs := []any{"job_name", job.GetName(), "job_status", job.GetStatus()}
+	logArgs := []any{"job_name", job.GetName(), "job_status", job.GetStatus(), "job_conclusion", job.GetConclusion()}
 	if job.GetStatus() != statusCompleted {
 		logger.Warn("job is not completed yet", logArgs...)
 		return &Job{
@@ -40,17 +40,17 @@ func (c *Collector) GetJob(ctx context.Context, logger *slog.Logger, input *Inpu
 			Job: job,
 		}, nil
 	}
-	groups, err := parser.Parse(logger, bytes.NewBuffer(jobLog))
+	log, err := parser.Parse(bytes.NewBuffer(jobLog))
 	if err != nil {
 		slogerr.WithError(logger, err).Error("parse a job log", logArgs...)
 		return &Job{
 			Job:    job,
-			Groups: groups,
+			Groups: log.Groups,
 		}, nil
 	}
 	return &Job{
 		Job:    job,
-		Groups: groups,
+		Groups: log.Groups,
 	}, nil
 }
 

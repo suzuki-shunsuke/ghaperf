@@ -30,6 +30,8 @@ type (
 	ListOptions               = github.ListOptions
 	TaskStep                  = github.TaskStep
 	WorkflowRunAttemptOptions = github.WorkflowRunAttemptOptions
+	ListWorkflowRunsOptions   = github.ListWorkflowRunsOptions
+	WorkflowRuns              = github.WorkflowRuns
 )
 
 func New(ctx context.Context, logger *slog.Logger, input *InputNew) (*Client, error) {

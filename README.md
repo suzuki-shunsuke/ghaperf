@@ -69,6 +69,14 @@ ghaperf --repo szksh-lab-2/test-github-action --job-id 53656655343 --threshold 1
 ghaperf --repo szksh-lab-2/test-github-action --run-id 18804539465 --threshold 1s
 ```
 
+4. Run against workflow runs:
+
+Note that this command may take longer for larger count values.
+
+```sh
+ghaperf --repo suzuki-shunsuke/ghaperf --workflow test.yaml --count 10 --threshold 1s
+```
+
 ghaperf outputs the report.
 ghaperf reports steps and log groups which take longer than threshold.
 

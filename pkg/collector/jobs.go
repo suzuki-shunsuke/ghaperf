@@ -1,7 +1,6 @@
 package collector
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -10,13 +9,12 @@ import (
 
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghaperf/pkg/github"
-	"github.com/suzuki-shunsuke/ghaperf/pkg/parser"
 	"github.com/suzuki-shunsuke/ghaperf/pkg/xdg"
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
 )
 
-func (r *Collector) getJobs(ctx context.Context, logger *slog.Logger, input *Input, run *github.WorkflowRun) ([]*Job, error) {
-	cachePath := xdg.RunJobIDsCache(input.CacheDir, input.RepoOwner, input.RepoName, input.RunID, input.AttemptNumber)
+func (r *Collector) getJobs(ctx context.Context, logger *slog.Logger, input *Input, run *github.WorkflowRun) ([]*github.WorkflowJob, error) {
+	cachePath := xdg.RunJobIDsCache(input.CacheDir, input.RepoOwner, input.RepoName, run.GetID(), run.GetRunAttempt())
 	b, err := afero.ReadFile(r.fs, cachePath)
 	if err != nil {
 		if !errors.Is(err, afero.ErrFileNotFound) {
@@ -29,9 +27,9 @@ func (r *Collector) getJobs(ctx context.Context, logger *slog.Logger, input *Inp
 	if err := json.Unmarshal(b, &jobIDs); err != nil {
 		return nil, fmt.Errorf("unmarshal cached job ids: %w", err)
 	}
-	arr := make([]*Job, len(jobIDs))
+	arr := make([]*github.WorkflowJob, len(jobIDs))
 	for i, jobID := range jobIDs {
-		job, err := r.GetJob(ctx, logger, input, jobID)
+		job, err := r.getJob(ctx, logger, input, jobID)
 		if err != nil {
 			return nil, fmt.Errorf("get a job: %w", err)
 		}
@@ -40,9 +38,9 @@ func (r *Collector) getJobs(ctx context.Context, logger *slog.Logger, input *Inp
 	return arr, nil
 }
 
-func (r *Collector) getAndCacheJobs(ctx context.Context, logger *slog.Logger, input *Input, jobIDsPath string, run *github.WorkflowRun) ([]*Job, error) {
+func (r *Collector) getAndCacheJobs(ctx context.Context, logger *slog.Logger, input *Input, jobIDsPath string, run *github.WorkflowRun) ([]*github.WorkflowJob, error) {
 	// cache not found
-	jobs, err := r.gh.ListWorkflowJobs(ctx, input.RepoOwner, input.RepoName, input.RunID, input.AttemptNumber)
+	jobs, err := r.gh.ListWorkflowJobs(ctx, input.RepoOwner, input.RepoName, run.GetID(), input.AttemptNumber)
 	if err != nil {
 		return nil, fmt.Errorf("get workflow run by ID: %w", err)
 	}
@@ -56,37 +54,14 @@ func (r *Collector) getAndCacheJobs(ctx context.Context, logger *slog.Logger, in
 	if err := r.cacheJobs(logger, input, jobs); err != nil {
 		slogerr.WithError(logger, err).Error("cache jobs")
 	}
-	arr := make([]*Job, 0, len(jobs))
-	for _, job := range jobs {
-		logArgs := []any{"job_id", job.GetID(), "job_name", job.GetName(), "job_status", job.GetStatus()}
-		if job.GetStatus() != statusCompleted {
-			logger.Warn("exclude a not completed job", logArgs...)
-			continue
-		}
-		jobLog, err := r.GetJobLog(ctx, input, job.GetID())
-		if err != nil {
-			slogerr.WithError(logger, err).Error("get a job log", logArgs...)
-			arr = append(arr, &Job{
-				Job: job,
-			})
-			continue
-		}
-		groups, err := parser.Parse(logger, bytes.NewBuffer(jobLog))
-		if err != nil {
-			slogerr.WithError(logger, err).Error("parse a job log", logArgs...)
-		}
-		arr = append(arr, &Job{
-			Job:    job,
-			Groups: groups,
-		})
-	}
-	return arr, nil
+	return jobs, nil
 }
 
 func (r *Collector) cacheJobs(logger *slog.Logger, input *Input, jobs []*github.WorkflowJob) error {
 	for _, job := range jobs {
+		logArgs := []any{"job_id", job.GetID(), "job_name", job.GetName(), "job_status", job.GetStatus(), "job_conclusion", job.GetConclusion()}
 		if job.GetStatus() != statusCompleted {
-			logger.Warn("job is not completed yet", "job_id", job.GetID(), "status", job.GetStatus())
+			logger.Warn("job is not completed yet", logArgs...)
 			continue
 		}
 		jobCachePath := xdg.JobCache(input.CacheDir, input.RepoOwner, input.RepoName, job.GetID())
@@ -95,7 +70,7 @@ func (r *Collector) cacheJobs(logger *slog.Logger, input *Input, jobs []*github.
 		}
 		// cache the job info
 		if err := r.cacheJob(jobCachePath, job); err != nil {
-			return fmt.Errorf("cache job info: %w", err)
+			return fmt.Errorf("cache job info: %w", slogerr.With(err, logArgs...))
 		}
 	}
 	return nil

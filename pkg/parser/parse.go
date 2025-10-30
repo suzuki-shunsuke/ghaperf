@@ -2,15 +2,11 @@ package parser
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"io"
-	"log/slog"
 	"regexp"
 	"strings"
 	"time"
-
-	"github.com/suzuki-shunsuke/slog-error/slogerr"
 )
 
 /*
@@ -57,11 +53,33 @@ import (
 */
 
 type Group struct {
-	Name      string    `json:"name"`
-	StartTime time.Time `json:"start_time"`
-	EndTime   time.Time `json:"end_time"`
+	Name      string
+	Lines     []*Line
 	duration  time.Duration
-	Lines     []*Line `json:"lines"`
+	startTime time.Time
+	endTime   time.Time
+}
+
+func (g *Group) StartTime() time.Time {
+	if g == nil || len(g.Lines) == 0 {
+		return time.Time{}
+	}
+	if !g.startTime.IsZero() {
+		return g.startTime
+	}
+	g.startTime = g.Lines[0].Timestamp
+	return g.startTime
+}
+
+func (g *Group) EndTime() time.Time {
+	if g == nil || len(g.Lines) == 0 {
+		return time.Time{}
+	}
+	if !g.endTime.IsZero() {
+		return g.endTime
+	}
+	g.endTime = g.Lines[len(g.Lines)-1].Timestamp
+	return g.endTime
 }
 
 func (g *Group) Duration() time.Duration {
@@ -71,96 +89,118 @@ func (g *Group) Duration() time.Duration {
 	if g.duration != 0 {
 		return g.duration
 	}
-	if g.EndTime.IsZero() {
+	endTime := g.EndTime()
+	if endTime.IsZero() {
 		return 0
 	}
-	g.duration = g.EndTime.Sub(g.StartTime)
+	g.duration = endTime.Sub(g.StartTime())
 	return g.duration
 }
 
 type Line struct {
-	Timestamp time.Time `json:"timestamp"`
-	Content   string    `json:"content"`
+	Timestamp time.Time
+	Content   string
+	Start     bool
+	Continue  bool
+	JobName   string
 }
 
-func Parse(logger *slog.Logger, data io.Reader) ([]*Group, error) {
+type Log struct {
+	JobName  string
+	Groups   []*Group
+	duration time.Duration
+}
+
+func (l *Log) Duration() time.Duration {
+	if l == nil {
+		return 0
+	}
+	if l.duration != 0 {
+		return l.duration
+	}
+	if len(l.Groups) == 0 {
+		return 0
+	}
+	l.duration = l.Groups[len(l.Groups)-1].EndTime().Sub(l.Groups[0].StartTime())
+	return l.duration
+}
+
+func Parse(data io.Reader) (*Log, error) {
 	scanner := bufio.NewScanner(data)
-	groups := make([]*Group, 0, 1)
-	var group *Group
+	log := &Log{}
+	group := &Group{}
 
 	for scanner.Scan() {
 		txt := scanner.Text()
-		newGroup, err := parseLogLine(txt, group)
-		if err != nil {
-			slogerr.WithError(logger, err).Warn("parse a log line", "line", txt)
+		line := parseLine(txt)
+		if log.JobName == "" && line.JobName != "" {
+			log.JobName = line.JobName
 		}
-		if newGroup != nil {
-			groups = append(groups, group)
-			group = newGroup
+		if line.Continue {
+			group.Lines[len(group.Lines)-1].Content += "\n" + line.Content
+			continue
+		}
+		group.Lines = append(group.Lines, line)
+		if line.Start {
+			// End the previous group
+			log.Groups = append(log.Groups, group)
+			group = &Group{
+				Name: line.Content,
+			}
 		}
 	}
-	if group != nil {
-		if group.EndTime.IsZero() {
-			group.EndTime = group.Lines[len(group.Lines)-1].Timestamp
-		}
-		groups = append(groups, group)
-	}
+	log.Groups = append(log.Groups, group)
 
 	if err := scanner.Err(); err != nil {
 		return nil, fmt.Errorf("scan a log file: %w", err)
 	}
 
-	return groups, nil
+	return log, nil
 }
 
-var (
-	ansiEscapeSequence      = regexp.MustCompile(`\x1b\[[0-9;]*[A-Za-z]`)
-	errInvalidLogLineFormat = errors.New("invalid log line format")
-)
+var ansiEscapeSequence = regexp.MustCompile(`\x1b\[[0-9;]*[A-Za-z]`)
 
-func parseLogLine(txt string, group *Group) (*Group, error) { //nolint:cyclop
+func parseLine(txt string) *Line {
 	txt = ansiEscapeSequence.ReplaceAllString(
 		strings.TrimPrefix(txt, "\ufeff"), "") // Remove BOM and ANSI escape sequences
 	d, l, ok := strings.Cut(txt, " ")
 	if !ok {
 		// The log doesn't start with timestamp.
 		// This is a continuation from the previous log.
-		if group != nil && len(group.Lines) != 0 {
-			group.Lines[len(group.Lines)-1].Content += "\n" + txt
-			return nil, nil //nolint:nilnil
+		return &Line{
+			Continue: true,
+			Content:  txt,
 		}
-		return nil, errInvalidLogLineFormat
 	}
 	// 2025-10-25T13:48:59.4421674Z ##[group]Runner Image Provisioner
 	t, err := time.Parse("2006-01-02T15:04:05.9999999Z", d)
 	if err != nil {
 		// The log doesn't start with timestamp.
 		// This is a continuation from the previous log.
-		if group != nil && len(group.Lines) != 0 {
-			group.Lines[len(group.Lines)-1].Content += "\n" + txt
-			return nil, nil //nolint:nilnil
+		return &Line{
+			Continue: true,
+			Content:  txt,
 		}
-		return nil, fmt.Errorf("invalid timestamp: %w", slogerr.With(err, "timestamp", d))
 	}
 
 	switch {
 	case strings.HasPrefix(l, "##[group]"):
-		if group != nil {
-			group.EndTime = t
-		}
-
-		return &Group{
-			Name:      strings.TrimPrefix(l, "##[group]"),
-			StartTime: t,
-		}, nil
-	default:
-		if group == nil {
-			return nil, nil //nolint:nilnil
-		}
-		group.Lines = append(group.Lines, &Line{
+		return &Line{
+			Start:     true,
+			Content:   strings.TrimPrefix(l, "##[group]"),
 			Timestamp: t,
+		}
+	case strings.HasPrefix(l, "Complete job name: "):
+		// 2025-10-29T13:56:22.7273757Z Complete job name: test / test / test (windows-latest, arm64)
+		return &Line{
 			Content:   l,
-		})
+			JobName:   strings.TrimPrefix(l, "Complete job name: "),
+			Timestamp: t,
+		}
+	default:
+		return &Line{
+			Content:   l,
+			Timestamp: t,
+		}
 	}
-	return nil, nil //nolint:nilnil
 }
