@@ -109,7 +109,7 @@ func (r *Collector) readCachedLog(logger *slog.Logger, logCacheDir string, jobM 
 			slogerr.WithError(logger, err).Error("parse a cached log file", "file_name", info.Name())
 			continue
 		}
-		job, ok := jobM[info.Name()]
+		job, ok := jobM[log.JobName]
 		if !ok {
 			continue
 		}

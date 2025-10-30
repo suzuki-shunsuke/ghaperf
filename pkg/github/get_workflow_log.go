@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"path/filepath"
 	"strings"
 
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
@@ -56,6 +57,9 @@ func (c *Client) GetWorkflowRunLogs(ctx context.Context, owner, repo string, run
 	for _, f := range zr.File {
 		if strings.HasSuffix(f.Name, "/") {
 			continue // skip directories
+		}
+		if filepath.Dir(f.Name) != "." {
+			continue // skip files in sub directories
 		}
 		files = append(files, f)
 	}
