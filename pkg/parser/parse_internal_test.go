@@ -36,7 +36,7 @@ func Test_parseLine(t *testing.T) {
 			line: &Line{
 				Content:   "Runner Image Provisioner",
 				Start:     true,
-				Timestamp: time.Date(2025, 10, 25, 13, 48, 59, 4421674, time.UTC),
+				Timestamp: time.Date(2025, 10, 25, 13, 48, 59, 442167400, time.UTC),
 			},
 		},
 		{
@@ -45,7 +45,7 @@ func Test_parseLine(t *testing.T) {
 			line: &Line{
 				Content:   "Complete job name: test / test / test (windows-latest, arm64)",
 				JobName:   "test / test / test (windows-latest, arm64)",
-				Timestamp: time.Date(2025, 10, 29, 13, 56, 22, 7273757, time.UTC),
+				Timestamp: time.Date(2025, 10, 29, 13, 56, 22, 727375700, time.UTC),
 			},
 		},
 	}
