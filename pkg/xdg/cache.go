@@ -29,19 +29,19 @@ func JobLogCache(jobCachePath string) string {
 }
 
 func RunCache(cacheDir, repoOwner, repoName string, runID int64, attempt int) string {
-	file := "run.json"
-	dir := filepath.Join(cacheDir, "runs", repoOwner, repoName, strconv.FormatInt(runID, 10))
-	if attempt == 0 {
-		return filepath.Join(dir, file)
-	}
-	return filepath.Join(dir, strconv.Itoa(attempt), file)
+	return filepath.Join(cacheDir, "runs", repoOwner, repoName, strconv.FormatInt(runID, 10), strconv.Itoa(attempt), "run.json")
 }
 
 func RunJobIDsCache(cacheDir, repoOwner, repoName string, runID int64, attempt int) string {
 	file := "job_ids.json"
 	dir := filepath.Join(cacheDir, "runs", repoOwner, repoName, strconv.FormatInt(runID, 10))
-	if attempt == 0 {
-		return filepath.Join(dir, file)
-	}
 	return filepath.Join(dir, strconv.Itoa(attempt), file)
+}
+
+func RunLogCache(cacheDir, repoOwner, repoName string, runID int64, attempt int) string {
+	return filepath.Join(cacheDir, "runs", repoOwner, repoName, strconv.FormatInt(runID, 10), strconv.Itoa(attempt), "log")
+}
+
+func RunLogCacheFile(cacheDir, repoOwner, repoName string, runID int64, attempt int) string {
+	return filepath.Join(cacheDir, "runs", repoOwner, repoName, strconv.FormatInt(runID, 10), strconv.Itoa(attempt), "cached.txt")
 }

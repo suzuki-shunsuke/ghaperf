@@ -1,6 +1,7 @@
 package collector
 
 import (
+	"archive/zip"
 	"context"
 	"io"
 	"time"
@@ -21,6 +22,7 @@ type GitHub interface {
 	GetWorkflowRunByID(ctx context.Context, owner, repo string, runID int64, attempt int) (*github.WorkflowRun, error)
 	ListWorkflowJobs(ctx context.Context, owner, repo string, runID int64, attempt int) ([]*github.WorkflowJob, error)
 	ListWorkflowRuns(ctx context.Context, owner, repo string, fileName string, maxCount int, opts *github.ListWorkflowRunsOptions) ([]*github.WorkflowRun, error)
+	GetWorkflowRunLogs(ctx context.Context, owner, repo string, runID int64, atttempt int) ([]*zip.File, error)
 }
 
 func New(fs afero.Fs, gh GitHub) *Collector {

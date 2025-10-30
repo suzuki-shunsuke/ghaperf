@@ -9,7 +9,7 @@ import (
 )
 
 func (r *Runner) runWithRunID(ctx context.Context, logger *slog.Logger, input *collector.Input) error {
-	run, jobs, err := r.collector.GetRun(ctx, logger, input)
+	run, jobs, err := r.collector.GetRun(ctx, logger, input, input.RunID, input.AttemptNumber)
 	if err != nil {
 		return fmt.Errorf("get jobs by run id: %w", err)
 	}

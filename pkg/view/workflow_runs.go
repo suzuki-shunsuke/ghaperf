@@ -44,14 +44,15 @@ func (v *Viewer) ShowRuns(runs []*collector.WorkflowRun, threshold time.Duration
 	for _, run := range runs {
 		for _, job := range run.Jobs {
 			// TODO normalize job name for matrix jobs
-			jm, ok := jobMetrics[job.Job.GetName()]
+			jobName := job.Job.GetName()
+			jm, ok := jobMetrics[jobName]
 			if !ok {
 				jm = &JobMetric{
-					Name:   job.Job.GetName(),
+					Name:   jobName,
 					Metric: &Metric{},
 					Steps:  map[string]*StepMetric{},
 				}
-				jobMetrics[job.Job.GetName()] = jm
+				jobMetrics[jobName] = jm
 			}
 			jm.Metric.Add(jobDuration(job.Job))
 

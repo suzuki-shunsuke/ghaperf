@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"archive/zip"
 	"context"
 	"io"
 
@@ -23,6 +24,7 @@ type GitHub interface {
 	GetWorkflowRunByID(ctx context.Context, owner, repo string, runID int64) (*github.WorkflowRun, error)
 	ListWorkflowJobs(ctx context.Context, owner, repo string, runID int64) ([]*github.WorkflowJob, error)
 	ListWorkflowRuns(ctx context.Context, owner, repo string, fileName string, maxCount int, opts *github.ListWorkflowRunsOptions) ([]*github.WorkflowRun, error)
+	GetWorkflowRunLogs(ctx context.Context, owner, repo string, runID int64, attempt int) ([]*zip.File, error)
 }
 
 type InputNew struct{}

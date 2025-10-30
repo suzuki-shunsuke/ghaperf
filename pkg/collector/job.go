@@ -40,17 +40,17 @@ func (c *Collector) GetJob(ctx context.Context, logger *slog.Logger, input *Inpu
 			Job: job,
 		}, nil
 	}
-	groups, err := parser.Parse(logger, bytes.NewBuffer(jobLog))
+	log, err := parser.Parse(bytes.NewBuffer(jobLog))
 	if err != nil {
 		slogerr.WithError(logger, err).Error("parse a job log", logArgs...)
 		return &Job{
 			Job:    job,
-			Groups: groups,
+			Groups: log.Groups,
 		}, nil
 	}
 	return &Job{
 		Job:    job,
-		Groups: groups,
+		Groups: log.Groups,
 	}, nil
 }
 

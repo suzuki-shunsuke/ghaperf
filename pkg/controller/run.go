@@ -64,7 +64,7 @@ func (c *Controller) Run(ctx context.Context, logger *slog.Logger, logLevelVar *
 	}
 
 	if inputRun.LogFile != "" {
-		if err := runner.NewRunner(nil, arg.Stdout, arg.Fs).RunWithLogFile(logger, input); err != nil {
+		if err := runner.NewRunner(nil, arg.Stdout, arg.Fs).RunWithLogFile(input); err != nil {
 			return fmt.Errorf("run with log file: %w", err)
 		}
 		return nil
