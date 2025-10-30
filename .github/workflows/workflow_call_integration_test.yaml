@@ -18,6 +18,12 @@ jobs:
       - run: ghaperf -v
       - run: ghaperf -h
       - run: ghaperf --log-file testdata/log.txt --threshold 1s
-      - run: ghaperf --repo "$GITHUB_REPOSITORY" --run-id "$GITHUB_RUN_ID" --threshold 1s
+      - run: |
+          run_id=$(gh run list -w test.yaml -s completed -L 1 --json databaseId -q ".[0].databaseId")
+          ghaperf --repo "$GITHUB_REPOSITORY" --run-id "$run_id" --threshold 1s
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - run: |
+          ghaperf --repo "$GITHUB_REPOSITORY" --workflow test.yaml --count 10 --threshold 1s
         env:
           GITHUB_TOKEN: ${{ github.token }}
