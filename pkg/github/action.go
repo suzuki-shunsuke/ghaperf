@@ -20,6 +20,8 @@ type ActionsService interface {
 	ListWorkflowJobsAttempt(ctx context.Context, owner, repo string, runID, attemptNumber int64, opts *ListOptions) (*Jobs, *Response, error)
 }
 
+const maxPerPage = 100
+
 func (c *Client) GetWorkflowJobByID(ctx context.Context, owner, repo string, jobID int64) (*WorkflowJob, error) {
 	job, _, err := c.actions.GetWorkflowJobByID(ctx, owner, repo, jobID)
 	if err != nil {
@@ -77,7 +79,7 @@ func (c *Client) ListWorkflowJobs(ctx context.Context, owner, repo string, runID
 	list := c.getListJobsFunc(attempt)
 	opts := &ListWorkflowJobsOptions{
 		ListOptions: ListOptions{
-			PerPage: 100, //nolint:mnd
+			PerPage: maxPerPage,
 		},
 	}
 	arr := []*WorkflowJob{}
@@ -96,12 +98,11 @@ func (c *Client) ListWorkflowJobs(ctx context.Context, owner, repo string, runID
 }
 
 func (c *Client) getListJobsFunc(attempt int) func(ctx context.Context, owner, repo string, runID int64, page int) (*Jobs, *Response, error) {
-	const perPage = 100
 	if attempt > 0 {
 		return func(ctx context.Context, owner, repo string, runID int64, page int) (*Jobs, *Response, error) {
 			return c.actions.ListWorkflowJobsAttempt(ctx, owner, repo, runID, int64(attempt), &ListOptions{
 				Page:    page,
-				PerPage: perPage,
+				PerPage: maxPerPage,
 			})
 		}
 	}
@@ -109,7 +110,7 @@ func (c *Client) getListJobsFunc(attempt int) func(ctx context.Context, owner, r
 		return c.actions.ListWorkflowJobs(ctx, owner, repo, runID, &ListWorkflowJobsOptions{
 			ListOptions: ListOptions{
 				Page:    page,
-				PerPage: perPage,
+				PerPage: maxPerPage,
 			},
 		})
 	}
