@@ -144,7 +144,7 @@ func (v *Viewer) ShowRuns(runs []*collector.WorkflowRun, threshold time.Duration
 		}
 		fmt.Fprintln(v.stdout, "### Slow steps")
 		for i, sm := range slowSteps {
-			fmt.Fprintf(v.stdout, "%d. %s: total:%s, count:%d, avg:%s\n", i+1, sm.Name, sm.Metric.Sum, sm.Metric.Count, sm.Metric.Avg.Round(time.Second))
+			fmt.Fprintf(v.stdout, "%d. %s: %s (%s/%d)\n", i+1, sm.Name, sm.Metric.Avg.Round(time.Second), sm.Metric.Sum, sm.Metric.Count)
 			if len(sm.Groups) <= 1 {
 				continue
 			}
@@ -162,7 +162,7 @@ func (v *Viewer) ShowRuns(runs []*collector.WorkflowRun, threshold time.Duration
 				if gm.Metric.Avg < threshold {
 					continue
 				}
-				fmt.Fprintf(v.stdout, "    %d. %s: total:%s, count:%d, avg:%s\n", j+1, gm.Name, gm.Metric.Sum.Round(time.Second), gm.Metric.Count, gm.Metric.Avg.Round(time.Second))
+				fmt.Fprintf(v.stdout, "    %d. %s: %s (%s/%d)\n", j+1, gm.Name, gm.Metric.Avg.Round(time.Second), gm.Metric.Sum.Round(time.Second), gm.Metric.Count)
 			}
 		}
 	}
