@@ -120,6 +120,18 @@ The job has no slow steps
 
 </details>
 
+## Features
+
+- Generate the performance report with the markdown format
+  - Support reports of a workflow, a workflow run, and a workflow job
+- Easy to use
+  - Only ghaperf CLI is required. No backend to store metrics is necessary
+- Detect bottlenecks by analyzing workflow logs
+  - Detect the bottlenecks inside composite actions
+  - Detect slow log groups inside steps
+- Support normalizing job names for matrix jobs and renamed jobs
+- Cache GitHub API response of completed workflow runs and jobs
+
 ## Why?
 
 [There are some awesome tools](#similar-works), but they can't retrieve step-level data inside composite actions because [the Workflow Jobs APIs](https://docs.github.com/en/rest/actions/workflow-jobs) don’t include those data.
@@ -192,7 +204,6 @@ e.g.
 1. 2s: install aqua
    1. 1s: Run if [ "${SKIP_INSTALL_AQUA:-}" = true ] && command -v aqua >/dev/null; then
 2. 2s: Run sleep 2
-   1. 2s: Run sleep 2
 3. 1s: Set up job
 ```
 
