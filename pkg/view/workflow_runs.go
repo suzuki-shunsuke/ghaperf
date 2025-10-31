@@ -117,9 +117,9 @@ func (v *Viewer) ShowRuns(runs []*collector.WorkflowRun, threshold time.Duration
 			return stepArr[i].Metric.Sum > stepArr[j].Metric.Sum
 		})
 		fmt.Fprintf(v.stdout, "## Job: %s\n", jm.Name)
-		fmt.Fprintf(v.stdout, "Total Job Duration: %s\n", jm.Metric.Sum.Round(time.Second))
-		fmt.Fprintf(v.stdout, "The number of Job Executions: %d\n", jm.Metric.Count)
-		fmt.Fprintf(v.stdout, "Average Job Duration: %s\n", jm.Metric.Avg.Round(time.Second))
+		fmt.Fprintf(v.stdout, "- Total Job Duration: %s\n", jm.Metric.Sum.Round(time.Second))
+		fmt.Fprintf(v.stdout, "- The number of Job Executions: %d\n", jm.Metric.Count)
+		fmt.Fprintf(v.stdout, "- Average Job Duration: %s\n", jm.Metric.Avg.Round(time.Second))
 		slowSteps := make([]*StepMetric, 0, len(stepArr))
 		for _, sm := range stepArr {
 			if sm.Metric.Avg < threshold {
