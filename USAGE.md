@@ -27,9 +27,10 @@ OPTIONS:
    --workflow-event <event>               The workflow run event
    --workflow-created <date range>        The workflow run created date range
    --workflow-status <status>             The workflow run status
+   --config <path>                        The config file path
    --help, -h                             Show help
    --version, -v                          Show version
 
 VERSION:
-   0.0.2
+   0.0.3
 ```
