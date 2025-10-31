@@ -12,17 +12,24 @@ USAGE:
    ghaperf [OPTIONS]
 
 OPTIONS:
-   --log-level <debug|info|warn|error>            Set log level (or set GHIR_LOG_LEVEL)
-   --ghtkn                                        Enable the integration with ghtkn (or set GHAPERF_GHTKN)
-   --repo <owner>/<repo>                          Specify the repository
-   --run-id <run id>                              Specify the run ID
-   --job-id <job id>                              Specify the job ID
-   --attempt-number <attempt number>              Specify the workflow run's attempt number
-   --threshold <time duration> 				      Specify the threshold duration (e.g., 30s, 1m)
-   --log-file <file path>						  Specify the job log file path
-   --help, -h                                     Show help
-   --version, -v                                  Show version
+   --log-level <debug|info|warn|error>    Log level (or set GHIR_LOG_LEVEL)
+   --ghtkn                                Enable the integration with ghtkn (or set GHAPERF_GHTKN)
+   --repo <owner>/<repo>                  The repository
+   --run-id <run id>                      The run ID
+   --job-id <job id>                      The job ID
+   --attempt-number <attempt number>      The workflow run's attempt number
+   --threshold <time duration>            The threshold duration (e.g., 30s, 1m)
+   --log-file <file path>                 Log file path
+   --count <the number of workflow runs>  The number of workflow runs to analyze (default: 100)
+   --workflow <workflow name>             The workflow name
+   --workflow-actor <actor>               The workflow run actor
+   --workflow-branch <branch>             The workflow run branch
+   --workflow-event <event>               The workflow run event
+   --workflow-created <date range>        The workflow run created date range
+   --workflow-status <status>             The workflow run status
+   --help, -h                             Show help
+   --version, -v                          Show version
 
 VERSION:
-   0.0.1
+   0.0.2
 ```
