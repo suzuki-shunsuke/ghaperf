@@ -36,7 +36,7 @@ func (v *Viewer) ShowJob(j *collector.Job, threshold time.Duration) {
 
 	fmt.Fprintf(v.stdout, "## Job: %s\n", job.GetName())
 	fmt.Fprintf(v.stdout, "- Job ID: %d\n", job.GetID())
-	fmt.Fprintf(v.stdout, "- Job URL: %s\n", job.GetHTMLURL())
+	fmt.Fprintf(v.stdout, "- [Job URL](%s)\n", job.GetHTMLURL())
 	fmt.Fprintf(v.stdout, "- Job Status: %s\n", job.GetStatus())
 	fmt.Fprintf(v.stdout, "- Job Conclusion: %s\n", job.GetConclusion())
 	fmt.Fprintf(v.stdout, "- Job Duration: %s\n", j.Duration())
