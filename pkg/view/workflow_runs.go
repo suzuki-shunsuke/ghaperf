@@ -5,6 +5,7 @@ import (
 	"maps"
 	"slices"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/suzuki-shunsuke/ghaperf/pkg/collector"
@@ -22,10 +23,13 @@ func (m *Metric) Add(d time.Duration) {
 	m.Avg = m.Sum / time.Duration(m.Count)
 }
 
+const countSlowest = 3
+
 type JobMetric struct {
-	Name   string
-	Metric *Metric
-	Steps  map[string]*StepMetric
+	Name        string
+	Metric      *Metric
+	Steps       map[string]*StepMetric
+	SlowestJobs []*collector.Job
 }
 
 type StepMetric struct {
@@ -53,12 +57,14 @@ func (v *Viewer) ShowRuns(runs []*collector.WorkflowRun, threshold time.Duration
 			jm, ok := jobMetrics[job.NormalizedName]
 			if !ok {
 				jm = &JobMetric{
-					Name:   job.NormalizedName,
-					Metric: &Metric{},
-					Steps:  map[string]*StepMetric{},
+					Name:        job.NormalizedName,
+					Metric:      &Metric{},
+					Steps:       map[string]*StepMetric{},
+					SlowestJobs: make([]*collector.Job, 0, countSlowest),
 				}
 				jobMetrics[job.NormalizedName] = jm
 			}
+			updateSlowestJobs(jm, job)
 
 			for _, s := range job.Job.Steps {
 				sm, ok := jm.Steps[s.GetName()]
@@ -120,6 +126,11 @@ func (v *Viewer) ShowRuns(runs []*collector.WorkflowRun, threshold time.Duration
 		fmt.Fprintf(v.stdout, "- Total Job Duration: %s\n", jm.Metric.Sum.Round(time.Second))
 		fmt.Fprintf(v.stdout, "- The number of Job Executions: %d\n", jm.Metric.Count)
 		fmt.Fprintf(v.stdout, "- Average Job Duration: %s\n", jm.Metric.Avg.Round(time.Second))
+		slowestJobStrs := make([]string, len(jm.SlowestJobs))
+		for i, job := range jm.SlowestJobs {
+			slowestJobStrs[i] = fmt.Sprintf("[%s](%s)", job.Duration(), job.Job.GetHTMLURL())
+		}
+		fmt.Fprintf(v.stdout, "- Slowest jobs: %s\n", strings.Join(slowestJobStrs, ", "))
 		slowSteps := make([]*StepMetric, 0, len(stepArr))
 		for _, sm := range stepArr {
 			if sm.Metric.Avg < threshold {
@@ -155,4 +166,24 @@ func (v *Viewer) ShowRuns(runs []*collector.WorkflowRun, threshold time.Duration
 			}
 		}
 	}
+}
+
+func updateSlowestJobs(jm *JobMetric, job *collector.Job) {
+	if len(jm.SlowestJobs) < countSlowest {
+		jm.SlowestJobs = append(jm.SlowestJobs, job)
+		if len(jm.SlowestJobs) != countSlowest {
+			return
+		}
+		sort.Slice(jm.SlowestJobs, func(i, j int) bool {
+			return jm.SlowestJobs[i].Duration() > jm.SlowestJobs[j].Duration()
+		})
+		return
+	}
+	if jm.SlowestJobs[countSlowest-1].Duration() >= job.Duration() {
+		return
+	}
+	jm.SlowestJobs[countSlowest-1] = job
+	sort.Slice(jm.SlowestJobs, func(i, j int) bool {
+		return jm.SlowestJobs[i].Duration() > jm.SlowestJobs[j].Duration()
+	})
 }
