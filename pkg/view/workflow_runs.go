@@ -90,16 +90,7 @@ func (v *Viewer) ShowRuns(runs []*collector.WorkflowRun, threshold time.Duration
 			}
 		}
 		for normalizedJobName, job := range normalizedJobs {
-			jm, ok := jobMetrics[normalizedJobName]
-			if !ok {
-				jm = &JobMetric{
-					Name:   normalizedJobName,
-					Metric: &Metric{},
-					Steps:  map[string]*StepMetric{},
-				}
-				jobMetrics[normalizedJobName] = jm
-			}
-			jm.Metric.Add(job.Duration())
+			jobMetrics[normalizedJobName].Metric.Add(job.Duration())
 		}
 	}
 	jobArr := slices.Collect(maps.Values(jobMetrics))
