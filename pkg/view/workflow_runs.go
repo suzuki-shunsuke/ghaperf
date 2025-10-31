@@ -134,6 +134,9 @@ func (v *Viewer) ShowRuns(runs []*collector.WorkflowRun, threshold time.Duration
 		fmt.Fprintln(v.stdout, "### Slow steps")
 		for i, sm := range slowSteps {
 			fmt.Fprintf(v.stdout, "%d. %s: total:%s, count:%d, avg:%s\n", i+1, sm.Name, sm.Metric.Sum, sm.Metric.Count, sm.Metric.Avg.Round(time.Second))
+			if len(sm.Groups) <= 1 {
+				continue
+			}
 			groupArr := make([]*GroupMetric, 0, len(sm.Groups))
 			for groupName, m := range sm.Groups {
 				groupArr = append(groupArr, &GroupMetric{

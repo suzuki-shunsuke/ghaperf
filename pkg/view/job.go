@@ -52,6 +52,9 @@ func (v *Viewer) ShowJob(j *collector.Job, threshold time.Duration) {
 	fmt.Fprintln(v.stdout, "### Slow steps")
 	for i, step := range slowSteps {
 		fmt.Fprintf(v.stdout, "%d. %s: %s\n", i+1, step.Duration(), step.Name)
+		if len(step.Groups) == 1 {
+			continue
+		}
 		for j, group := range step.Groups {
 			fmt.Fprintf(v.stdout, "   %d. %s: %s\n", j+1, group.Duration().Round(time.Second), group.Name)
 		}
