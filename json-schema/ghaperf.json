@@ -1,1 +1,31 @@
-{}
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/suzuki-shunsuke/ghaperf/pkg/config/config",
+  "$ref": "#/$defs/Config",
+  "$defs": {
+    "Config": {
+      "properties": {
+        "job_names": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "excluded_job_names": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "job_name_mappings": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    }
+  }
+}
