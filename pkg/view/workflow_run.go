@@ -33,11 +33,11 @@ func (v *Viewer) ShowJobs(run *github.WorkflowRun, jobs []*collector.Job, thresh
 	sort.Slice(arr, func(i, j int) bool {
 		return arr[i].Duration > arr[j].Duration
 	})
-	fmt.Fprintf(v.stdout, "Workflow Run Name: %s\n", run.GetName())
-	fmt.Fprintf(v.stdout, "Workflow Run ID: %d\n", run.GetID())
-	fmt.Fprintf(v.stdout, "Workflow Run Status: %s\n", run.GetStatus())
-	fmt.Fprintf(v.stdout, "Workflow Run Conclusion: %s\n", run.GetConclusion())
-	fmt.Fprintf(v.stdout, "Workflow Run URL: %s\n", run.GetHTMLURL())
+	fmt.Fprintf(v.stdout, "- Workflow Run Name: %s\n", run.GetName())
+	fmt.Fprintf(v.stdout, "- Workflow Run ID: %d\n", run.GetID())
+	fmt.Fprintf(v.stdout, "- Workflow Run Status: %s\n", run.GetStatus())
+	fmt.Fprintf(v.stdout, "- Workflow Run Conclusion: %s\n", run.GetConclusion())
+	fmt.Fprintf(v.stdout, "- [Workflow Run URL](%s)\n", run.GetHTMLURL())
 	for _, job := range arr {
 		v.ShowJob(job.Job, threshold)
 	}

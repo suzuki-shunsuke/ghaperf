@@ -35,15 +35,15 @@ func (v *Viewer) ShowJob(j *collector.Job, threshold time.Duration) {
 	lastStepCompletedAt := job.Steps[len(job.Steps)-1].GetCompletedAt().Time
 
 	fmt.Fprintf(v.stdout, "## Job: %s\n", job.GetName())
-	fmt.Fprintf(v.stdout, "Job ID: %d\n", job.GetID())
-	fmt.Fprintf(v.stdout, "Job URL: %s\n", job.GetHTMLURL())
-	fmt.Fprintf(v.stdout, "Job Status: %s\n", job.GetStatus())
-	fmt.Fprintf(v.stdout, "Job Conclusion: %s\n", job.GetConclusion())
-	fmt.Fprintf(v.stdout, "Job Duration: %s\n", j.Duration())
-	fmt.Fprintf(v.stdout, "All Steps Duration: %s\n", allStepsDuration.Round(time.Second))
-	fmt.Fprintf(v.stdout, "Setup Job Duration: %s\n", firstStepStartedAt.Sub(job.StartedAt.Time).Round(time.Second))
-	fmt.Fprintf(v.stdout, "Cleanup Job Duration: %s\n", job.GetCompletedAt().Sub(lastStepCompletedAt).Round(time.Second))
-	fmt.Fprintf(v.stdout, "Steps Overhead: %s\n\n", (lastStepCompletedAt.Sub(firstStepStartedAt) - allStepsDuration).Round(time.Second))
+	fmt.Fprintf(v.stdout, "- Job ID: %d\n", job.GetID())
+	fmt.Fprintf(v.stdout, "- [Job URL](%s)\n", job.GetHTMLURL())
+	fmt.Fprintf(v.stdout, "- Job Status: %s\n", job.GetStatus())
+	fmt.Fprintf(v.stdout, "- Job Conclusion: %s\n", job.GetConclusion())
+	fmt.Fprintf(v.stdout, "- Job Duration: %s\n", j.Duration())
+	fmt.Fprintf(v.stdout, "- All Steps Duration: %s\n", allStepsDuration.Round(time.Second))
+	fmt.Fprintf(v.stdout, "- Setup Job Duration: %s\n", firstStepStartedAt.Sub(job.StartedAt.Time).Round(time.Second))
+	fmt.Fprintf(v.stdout, "- Cleanup Job Duration: %s\n", job.GetCompletedAt().Sub(lastStepCompletedAt).Round(time.Second))
+	fmt.Fprintf(v.stdout, "- Steps Overhead: %s\n\n", (lastStepCompletedAt.Sub(firstStepStartedAt) - allStepsDuration).Round(time.Second))
 	if len(slowSteps) == 0 {
 		fmt.Fprintf(v.stdout, "The job %s has no slow steps\n", job.GetName())
 		return
@@ -52,6 +52,9 @@ func (v *Viewer) ShowJob(j *collector.Job, threshold time.Duration) {
 	fmt.Fprintln(v.stdout, "### Slow steps")
 	for i, step := range slowSteps {
 		fmt.Fprintf(v.stdout, "%d. %s: %s\n", i+1, step.Duration(), step.Name)
+		if len(step.Groups) == 1 {
+			continue
+		}
 		for j, group := range step.Groups {
 			fmt.Fprintf(v.stdout, "   %d. %s: %s\n", j+1, group.Duration().Round(time.Second), group.Name)
 		}

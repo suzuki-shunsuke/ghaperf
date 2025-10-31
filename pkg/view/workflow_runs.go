@@ -117,9 +117,9 @@ func (v *Viewer) ShowRuns(runs []*collector.WorkflowRun, threshold time.Duration
 			return stepArr[i].Metric.Sum > stepArr[j].Metric.Sum
 		})
 		fmt.Fprintf(v.stdout, "## Job: %s\n", jm.Name)
-		fmt.Fprintf(v.stdout, "Total Job Duration: %s\n", jm.Metric.Sum.Round(time.Second))
-		fmt.Fprintf(v.stdout, "The number of Job Executions: %d\n", jm.Metric.Count)
-		fmt.Fprintf(v.stdout, "Average Job Duration: %s\n", jm.Metric.Avg.Round(time.Second))
+		fmt.Fprintf(v.stdout, "- Total Job Duration: %s\n", jm.Metric.Sum.Round(time.Second))
+		fmt.Fprintf(v.stdout, "- The number of Job Executions: %d\n", jm.Metric.Count)
+		fmt.Fprintf(v.stdout, "- Average Job Duration: %s\n", jm.Metric.Avg.Round(time.Second))
 		slowSteps := make([]*StepMetric, 0, len(stepArr))
 		for _, sm := range stepArr {
 			if sm.Metric.Avg < threshold {
@@ -134,6 +134,9 @@ func (v *Viewer) ShowRuns(runs []*collector.WorkflowRun, threshold time.Duration
 		fmt.Fprintln(v.stdout, "### Slow steps")
 		for i, sm := range slowSteps {
 			fmt.Fprintf(v.stdout, "%d. %s: total:%s, count:%d, avg:%s\n", i+1, sm.Name, sm.Metric.Sum, sm.Metric.Count, sm.Metric.Avg.Round(time.Second))
+			if len(sm.Groups) <= 1 {
+				continue
+			}
 			groupArr := make([]*GroupMetric, 0, len(sm.Groups))
 			for groupName, m := range sm.Groups {
 				groupArr = append(groupArr, &GroupMetric{
