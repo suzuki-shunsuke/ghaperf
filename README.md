@@ -1,27 +1,21 @@
 # ghaperf
 
-[![Build Status](https://github.com/suzuki-shunsuke/ghaperf/workflows/test/badge.svg)](https://github.com/suzuki-shunsuke/ghaperf/actions)
-[![GitHub last commit](https://img.shields.io/github/last-commit/suzuki-shunsuke/ghaperf.svg)](https://github.com/suzuki-shunsuke/ghaperf)
-[![License](https://img.shields.io/github/license/suzuki-shunsuke/ghaperf.svg)](https://github.com/suzuki-shunsuke/ghaperf/blob/main/LICENSE)
-
-> A CLI tool to analyze GitHub Actions performance and detect bottlenecks inside composite actions
-
 **ghaperf** analyzes the performance of GitHub Actions workflows using GitHub API and raw job logs. Unlike other tools, it can detect bottlenecks **inside composite actions** by parsing job logs and extracting step-level timing data.
 
 ## Why ghaperf?
 
-[Existing tools](#similar-works) rely on the [Workflow Jobs API](https://docs.github.com/en/rest/actions/workflow-jobs), which doesn't include step-level data from composite actions. **ghaperf** solves this by:
+[Existing tools](#related-projects) rely on the [Workflow Jobs API](https://docs.github.com/en/rest/actions/workflow-jobs), which doesn't include step-level data from composite actions. **ghaperf** solves this by:
 
 - Retrieving and parsing raw job logs via the API
 - Extracting timing data from all log groups, including steps within composite actions
-- Providing detailed performance reports in markdown format
 
 ## Quick Start
 
-**Prerequisites:** A GitHub access token is required ([learn why](#github-access-token))
+1. [Install ghaperf](INSTALL.md)
+1. [(Optional) Set your GitHub Access token to avoid GitHub API rate limit and to access private repositories](#github-access-token)
+1. Run ghaperf
 
 ```sh
-# Set your GitHub token
 export GITHUB_TOKEN=xxx
 
 # Analyze a workflow across multiple runs
@@ -142,7 +136,6 @@ The job has no slow steps
 
 - **Deep visibility into composite actions** - Detect bottlenecks inside composite actions that other tools miss
 - **Multiple analysis modes** - Analyze workflows, workflow runs, or individual jobs
-- **Smart job normalization** - Handle matrix jobs and renamed jobs automatically
 - **Markdown reports** - Generate shareable performance reports
 - **No infrastructure needed** - Just a CLI tool, no backend or metrics storage required
 - **Intelligent caching** - Cache GitHub API responses for completed runs to speed up analysis
@@ -152,13 +145,9 @@ The job has no slow steps
 
 See [INSTALL.md](INSTALL.md) for detailed installation instructions.
 
-Quick install with [aqua](https://aquaproj.github.io/):
-
-```sh
-aqua g -i suzuki-shunsuke/ghaperf
-```
-
 ## Usage
+
+For complete usage documentation, see [USAGE.md](USAGE.md).
 
 ### Prerequisites
 
@@ -173,27 +162,30 @@ export GITHUB_TOKEN=xxx
 **1. Analyze multiple workflow runs** (recommended for performance insights)
 
 ```sh
-ghaperf --repo suzuki-shunsuke/ghaperf --workflow test.yaml --count 10 --threshold 1s
+ghaperf \
+  --repo suzuki-shunsuke/ghaperf \
+  --workflow test.yaml \
+  --count 10 \
+  --threshold 2s
 ```
 
-Note: Higher `--count` values provide better insights but take longer to process.
+> [!NOTE]
+> Higher `--count` values provide better insights but take longer to process.
 
 **2. Analyze a single workflow run**
 
 ```sh
-run_id=$(gh run list -R suzuki-shunsuke/tfaction -w test.yaml -s completed -L 1 --json databaseId -q ".[0].databaseId")
-ghaperf --repo "suzuki-shunsuke/tfaction" --run-id "$run_id" --threshold 1s
+ghaperf \
+  --repo "suzuki-shunsuke/tfaction" \
+  --run-id "<workflow run id>"
 ```
 
 **3. Analyze a specific job**
 
 ```sh
-job_id=$(gh api \
-  -H "Accept: application/vnd.github+json" \
-  -H "X-GitHub-Api-Version: 2022-11-28" \
-  "/repos/suzuki-shunsuke/tfaction/actions/runs/${run_id}/jobs?per_page=1" \
-  -q ".jobs[0].id")
-ghaperf --repo suzuki-shunsuke/tfaction --job-id "$job_id" --threshold 1s
+ghaperf \
+  --repo suzuki-shunsuke/tfaction \
+  --job-id "<workflow job id>"
 ```
 
 **4. Analyze a local log file**
@@ -202,45 +194,27 @@ ghaperf --repo suzuki-shunsuke/tfaction --job-id "$job_id" --threshold 1s
 ghaperf --log-file path/to/job.log
 ```
 
-See the [example log file](https://github.com/suzuki-shunsuke/ghaperf/blob/main/testdata/log.txt) for format reference.
-
-### Understanding the Output
-
-ghaperf reports steps and log groups that exceed the specified threshold:
-
-```markdown
-### Slow steps
-1. 2s: install aqua
-   1. 1s: Run if [ "${SKIP_INSTALL_AQUA:-}" = true ] && command -v aqua >/dev/null; then
-2. 2s: Run sleep 2
-3. 1s: Set up job
-```
-
-**Threshold Configuration:**
-- Default: `30s`
-- Set via `--threshold` flag or `GHAPERF_THRESHOLD` environment variable
-- Format: [Go duration](https://pkg.go.dev/time#ParseDuration) (e.g., `1s`, `500ms`, `2m30s`)
-
-For complete usage documentation, see [USAGE.md](USAGE.md).
+See the [example log file](testdata/log.txt) for format reference.
 
 ## Configuration
 
 ### Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `GHAPERF_LOG_LEVEL` | Log level: `debug`, `info`, `warn`, `error` | `info` |
-| `GHAPERF_GITHUB_TOKEN` | GitHub access token | - |
-| `GITHUB_TOKEN` | GitHub access token (alternative) | - |
-| `GHAPERF_GHTKN` | Enable [ghtkn](https://github.com/suzuki-shunsuke/ghtkn) integration | `false` |
-| `GHAPERF_THRESHOLD` | Default threshold for slow steps/log groups | `30s` |
+ Variable | Description | Default
+---|---|---
+`GHAPERF_LOG_LEVEL` | Log level: `debug`, `info`, `warn`, `error` | `info`
+`GHAPERF_GITHUB_TOKEN` | GitHub access token | -
+`GITHUB_TOKEN` | GitHub access token (alternative) | -
+`GHAPERF_GHTKN` | Enable [ghtkn](https://github.com/suzuki-shunsuke/ghtkn) integration | `false`
+`GHAPERF_THRESHOLD` | Default threshold for slow steps/log groups | `30s`
 
 ### GitHub Access Token
 
 A GitHub access token is required to fetch workflow runs, jobs, and logs via the GitHub API.
+An access token isn't required for public repositories, but it's recommended to avoid API rate limit.
 
 **Required Permissions:**
-- Public repositories: No specific permissions needed (but recommended to avoid rate limits)
+- Public repositories: No specific permissions needed
 - Private repositories: `Actions: Read` permission
 
 **Setup:**
@@ -256,19 +230,25 @@ export GHAPERF_GITHUB_TOKEN=ghp_xxxxxxxxxxxxx
 export GHAPERF_GHTKN=true
 ```
 
-[Create a personal access token](https://github.com/settings/tokens) if you don't have one.
+### Threshold
+
+ghaperf reports steps and log groups that exceed the specified threshold:
+
+**Threshold Configuration:**
+- Default: `30s`
+- Set via `--threshold` flag or `GHAPERF_THRESHOLD` environment variable
+- Format: [Go duration](https://pkg.go.dev/time#ParseDuration) (e.g., `1s`, `2m30s`)
 
 ### Configuration File
 
-Use configuration files to filter jobs and normalize matrix job names. All settings are optional.
-
-**Example:**
+Use configuration files to filter jobs by job name and normalize job names.
+All settings are optional.
 
 ```sh
-ghaperf --repo suzuki-shunsuke/ghaperf --workflow test.yaml --count 10 --config ghaperf.yaml
+ghperf --config <configuration file path> ...
 ```
 
-**Configuration Options:**
+e.g.
 
 ```yaml
 # Only analyze jobs matching these glob patterns
@@ -303,11 +283,15 @@ ajv --spec=draft2020 -s json-schema/ghaperf.json -d ghaperf.yaml
 
 Enable auto-completion in your editor by adding this to your config file:
 
-```yaml
-# Latest version
-# yaml-language-server: $schema=https://raw.githubusercontent.com/suzuki-shunsuke/ghaperf/main/json-schema/ghaperf.json
+Latest version:
 
-# Or pin to a specific version
+```yaml
+# yaml-language-server: $schema=https://raw.githubusercontent.com/suzuki-shunsuke/ghaperf/main/json-schema/ghaperf.json
+```
+
+Or pin to a specific version:
+
+```
 # yaml-language-server: $schema=https://raw.githubusercontent.com/suzuki-shunsuke/ghaperf/v0.0.3/json-schema/ghaperf.json
 ```
 
@@ -331,20 +315,18 @@ This speeds up repeated analyses and reduces API calls.
 
 ## Related Projects
 
-While these tools are excellent for analyzing GitHub Actions performance, they don't provide step-level visibility into composite actions like ghaperf does:
+While these tools are excellent for analyzing GitHub Actions performance, they don't provide step-level visibility into composite actions like ghaperf does.
+We don't aim to replace these tools with ghaperf.
+For this reason, it is not our intention to re-implement features already present in other tools, such as CIAnalyzer, in ghaperf.
+Rather, ghaperf preserves features that other tools are missing.
+Tools like CIAnalyzer are more suitable if you want to know how performance changes over the medium to long term.
+On the other hand, ghaperf is more suitable if you want to investigate current performance bottlenecks in more detail.
 
 - [GitHub Actions Performance Metrics](https://docs.github.com/en/actions/concepts/metrics#about-github-actions-performance-metrics) - Official GitHub metrics
-- [actions-timeline](https://github.com/Kesin11/actions-timeline) - Visual timeline of workflow runs
-- [github_actions_otel_trace](https://github.com/Kesin11/github_actions_otel_trace) - Export traces to OpenTelemetry
-- [CIAnalyzer](https://github.com/Kesin11/CIAnalyzer) - CI performance analysis tool
-- [otel-export-trace-action](https://github.com/inception-health/otel-export-trace-action) - OpenTelemetry trace export
-- [workflow-telemetry-action](https://github.com/runforesight/workflow-telemetry-action) - Workflow telemetry collection
-- [github-actions-opentelemetry](https://github.com/paper2/github-actions-opentelemetry) - OpenTelemetry integration
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit issues or pull requests.
-
-## License
-
-[MIT License](LICENSE)
+- [actions-timeline](https://github.com/Kesin11/actions-timeline) - GitHub Actions to visualize timeline of a workflow job in a job summary
+- [CIAnalyzer](https://github.com/Kesin11/CIAnalyzer) - Collect metrics to BigQuery
+- Collect metrics to OpenTelemetry
+  - [github_actions_otel_trace](https://github.com/Kesin11/github_actions_otel_trace) - Export traces to OpenTelemetry
+  - [otel-export-trace-action](https://github.com/inception-health/otel-export-trace-action) - OpenTelemetry trace export
+  - [workflow-telemetry-action](https://github.com/runforesight/workflow-telemetry-action)
+  - [github-actions-opentelemetry](https://github.com/paper2/github-actions-opentelemetry)
