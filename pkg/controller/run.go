@@ -12,6 +12,7 @@ import (
 
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/ghaperf/pkg/collector"
+	"github.com/suzuki-shunsuke/ghaperf/pkg/config"
 	"github.com/suzuki-shunsuke/ghaperf/pkg/github"
 	"github.com/suzuki-shunsuke/ghaperf/pkg/log"
 	"github.com/suzuki-shunsuke/ghaperf/pkg/runner"
@@ -34,6 +35,7 @@ type InputRun struct {
 	ListWorkflowRunsOptions *github.ListWorkflowRunsOptions
 	WorkflowNumber          int
 	WorkflowName            string
+	Config                  string
 }
 
 const (
@@ -113,6 +115,11 @@ func (c *Controller) getInput(input *InputRun, arg *Arg) (*collector.Input, erro
 		return nil, err
 	}
 
+	cfg := &config.Config{}
+	if err := readConfig(arg.Fs, input.Config, cfg); err != nil {
+		return nil, err
+	}
+
 	return &collector.Input{
 		Threshold:               threshold,
 		CacheDir:                xdg.CacheDir(arg.Getenv, arg.Home),
@@ -124,10 +131,24 @@ func (c *Controller) getInput(input *InputRun, arg *Arg) (*collector.Input, erro
 		WorkflowNumber:          input.WorkflowNumber,
 		WorkflowName:            input.WorkflowName,
 		ListWorkflowRunsOptions: input.ListWorkflowRunsOptions,
+		Config:                  cfg,
 	}, nil
 }
 
 const defaultThreshold = 30 * time.Second
+
+func readConfig(fs afero.Fs, path string, cfg *config.Config) error {
+	if path == "" {
+		return nil
+	}
+	if err := config.Read(fs, path, cfg); err != nil {
+		return fmt.Errorf("read config file: %w", err)
+	}
+	if err := cfg.Validate(); err != nil {
+		return fmt.Errorf("validate config file: %w", err)
+	}
+	return nil
+}
 
 func getThreshold(s string, getEnv func(string) string) (time.Duration, error) {
 	threshold := getThresholdStr(s, getEnv)

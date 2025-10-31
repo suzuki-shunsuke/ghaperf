@@ -47,8 +47,8 @@ func (s *Step) Contain(group *parser.Group, threshold time.Duration) {
 		// Go to the next group
 		return
 	}
-	centerTime := s.StartTime.Add(s.Duration() / 2) //nolint:mnd
-	if group.StartTime().Before(centerTime) && group.EndTime().After(centerTime) {
+	centerTime := group.StartTime().Add(group.Duration() / 2) //nolint:mnd
+	if s.StartTime.Before(centerTime) && s.EndTime.After(centerTime) {
 		// The group is contained in the step
 		s.Groups = append(s.Groups, group)
 		return

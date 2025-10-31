@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/spf13/afero"
+	"github.com/suzuki-shunsuke/ghaperf/pkg/config"
 	"github.com/suzuki-shunsuke/ghaperf/pkg/github"
 	"github.com/suzuki-shunsuke/ghaperf/pkg/parser"
 )
@@ -44,12 +45,14 @@ type Input struct {
 	WorkflowNumber          int
 	WorkflowName            string
 	ListWorkflowRunsOptions *github.ListWorkflowRunsOptions
+	Config                  *config.Config
 }
 
 type Job struct {
-	Job      *github.WorkflowJob
-	Groups   []*parser.Group
-	duration time.Duration
+	Job            *github.WorkflowJob
+	Groups         []*parser.Group
+	duration       time.Duration
+	NormalizedName string
 }
 
 func (j *Job) Duration() time.Duration {

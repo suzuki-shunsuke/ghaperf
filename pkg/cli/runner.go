@@ -34,6 +34,7 @@ OPTIONS:
    --workflow-event <event>               The workflow run event
    --workflow-created <date range>        The workflow run created date range
    --workflow-status <status>             The workflow run status
+   --config <path>                        The config file path
    --help, -h                             Show help
    --version, -v                          Show version
 
@@ -62,6 +63,7 @@ func parseFlags(f *controller.InputRun) {
 	pflag.StringVar(&f.ListWorkflowRunsOptions.Event, "workflow-event", "", "the workflow run event")
 	pflag.StringVar(&f.ListWorkflowRunsOptions.Created, "workflow-created", "", "the workflow run created date range")
 	pflag.StringVar(&f.ListWorkflowRunsOptions.Status, "workflow-status", "", "the workflow run status")
+	pflag.StringVar(&f.Config, "config", "", "the config file path")
 
 	pflag.Parse()
 	f.Args = pflag.Args()

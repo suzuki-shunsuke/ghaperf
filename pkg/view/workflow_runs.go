@@ -42,22 +42,23 @@ type GroupMetric struct {
 func (v *Viewer) ShowRuns(runs []*collector.WorkflowRun, threshold time.Duration) { //nolint:gocognit,cyclop,funlen
 	jobMetrics := map[string]*JobMetric{}
 	for _, run := range runs {
+		normalizedJobs := map[string]*collector.Job{}
 		for _, job := range run.Jobs {
 			if job.Job.GetStatus() != "completed" {
 				continue
 			}
-			// TODO normalize job name for matrix jobs
-			jobName := job.Job.GetName()
-			jm, ok := jobMetrics[jobName]
+			if normalizedJobs[job.NormalizedName].Duration() < job.Duration() {
+				normalizedJobs[job.NormalizedName] = job
+			}
+			jm, ok := jobMetrics[job.NormalizedName]
 			if !ok {
 				jm = &JobMetric{
-					Name:   jobName,
+					Name:   job.NormalizedName,
 					Metric: &Metric{},
 					Steps:  map[string]*StepMetric{},
 				}
-				jobMetrics[jobName] = jm
+				jobMetrics[job.NormalizedName] = jm
 			}
-			jm.Metric.Add(job.Duration())
 
 			for _, s := range job.Job.Steps {
 				sm, ok := jm.Steps[s.GetName()]
@@ -87,6 +88,9 @@ func (v *Viewer) ShowRuns(runs []*collector.WorkflowRun, threshold time.Duration
 					m.Add(group.Duration())
 				}
 			}
+		}
+		for normalizedJobName, job := range normalizedJobs {
+			jobMetrics[normalizedJobName].Metric.Add(job.Duration())
 		}
 	}
 	jobArr := slices.Collect(maps.Values(jobMetrics))

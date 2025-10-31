@@ -39,8 +39,13 @@ func (r *Collector) getJobsAndLogs(ctx context.Context, logger *slog.Logger, inp
 	}
 	jobM := make(map[string]*Job, len(jobs))
 	for _, job := range jobs {
+		name := input.Config.NormalizeJobName(job.GetName())
+		if !input.Config.Include(job.GetName()) {
+			continue
+		}
 		jobM[job.GetName()] = &Job{
-			Job: job,
+			Job:            job,
+			NormalizedName: name,
 		}
 	}
 	logCacheDir := xdg.RunLogCache(input.CacheDir, input.RepoOwner, input.RepoName, run.GetID(), run.GetRunAttempt())
