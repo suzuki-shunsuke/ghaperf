@@ -119,6 +119,56 @@ Or if you use [ghtkn](https://github.com/suzuki-shunsuke/ghtkn), you can enable 
 export GHAPERF_GHTKN=true
 ```
 
+## Configuration file
+
+Configuration files (`--config <configuration file path>`) are used to filter jobs by job name and normalize matrix job names.
+Configuration files and all settings are optional.
+
+```sh
+ghaperf --repo suzuki-shunsuke/ghaperf --workflow test.yaml --count 10 --config ghaperf.yaml
+```
+
+ghaperf.yaml:
+
+- `job_names`: (Optional) A list of job name glob patterns. Only jobs matching with any patterns are used.
+- `excluded_job_names`: (Optional) A list of job name glob patterns. Only jobs not matching with all patterns are used.
+- `job_name_mappings`: (Optional) A map of job name glob patterns and normalized job names. This is used to normalize matrix job names.
+
+```yaml
+job_names:
+  - "test / test / test *"
+# excluded_jobs_name:
+#   - "test / test / test *"
+job_name_mappings:
+  "test / test / test *": "test/ test / test"
+```
+
+### JSON Schema of Configuration files
+
+[ghaperf.json](json-schema/ghaperf.json)
+
+If you look for a CLI tool to validate configuration with JSON Schema, [ajv-cli](https://ajv.js.org/packages/ajv-cli.html) is useful.
+
+```sh
+ajv --spec=draft2020 -s json-schema/ghaperf.json -d pinact.yaml
+```
+
+#### Input Complementation by YAML Language Server
+
+[Please see the comment too.](https://github.com/szksh-lab/.github/issues/67#issuecomment-2564960491)
+
+Version: `main`
+
+```yaml
+# yaml-language-server: $schema=https://raw.githubusercontent.com/suzuki-shunsuke/ghaperf/main/json-schema/ghaperf.json
+```
+
+Or pinning version:
+
+```yaml
+# yaml-language-server: $schema=https://raw.githubusercontent.com/suzuki-shunsuke/ghaperf/v0.0.3/json-schema/ghaperf.json
+```
+
 ## Usage
 
 [Please see here.](USAGE.md)
@@ -133,6 +183,7 @@ ghaperf gets job logs by [GitHub API](https://docs.github.com/en/rest/actions/wo
 
 ## Similar Works
 
+- [GitHub Actions Performance Metrics](https://docs.github.com/en/actions/concepts/metrics#about-github-actions-performance-metrics)
 - https://github.com/Kesin11/actions-timeline
 - https://github.com/Kesin11/github_actions_otel_trace
 - https://github.com/Kesin11/CIAnalyzer
