@@ -26,8 +26,11 @@ func (c *Client) download(ctx context.Context, link string) (*http.Response, err
 }
 
 func (c *Client) GetWorkflowRunLogs(ctx context.Context, owner, repo string, runID int64, attempt int) ([]*zip.File, error) {
-	link, _, err := c.actions.GetWorkflowRunAttemptLogs(ctx, owner, repo, runID, attempt, maxRedirects)
+	link, res, err := c.actions.GetWorkflowRunAttemptLogs(ctx, owner, repo, runID, attempt, maxRedirects)
 	if err != nil {
+		if res.StatusCode == http.StatusGone {
+			return nil, fmt.Errorf("download workflow run logs: %w", slogerr.With(ErrLogHasGone, "status_code", res.StatusCode))
+		}
 		return nil, fmt.Errorf("get workflow run logs redirect URL: %w", err)
 	}
 	resp, err := c.download(ctx, link.String())
@@ -42,12 +45,15 @@ func (c *Client) GetWorkflowRunLogs(ctx context.Context, owner, repo string, run
 		}
 		return nil, fmt.Errorf("download workflow run logs: %w", slogerr.With(errInvalidStatusCode, "status_code", resp.StatusCode, "response_body", string(b)))
 	}
-	// write the body to a temporary file
-	buf, err := io.ReadAll(resp.Body)
+	return readZip(resp.Body)
+}
+
+func readZip(body io.ReadCloser) ([]*zip.File, error) {
+	buf, err := io.ReadAll(body)
 	if err != nil {
 		return nil, fmt.Errorf("read response body: %w", err)
 	}
-	resp.Body.Close()
+	body.Close()
 	readerAt := bytes.NewReader(buf)
 	zr, err := zip.NewReader(readerAt, int64(len(buf)))
 	if err != nil {

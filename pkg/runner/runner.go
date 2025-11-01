@@ -37,14 +37,14 @@ type Viewer interface {
 	ShowHeader(arg *view.HeaderArg)
 	ShowJob(job *collector.Job, threshold time.Duration)
 	ShowGroups(groups []*parser.Group, threshold time.Duration)
-	ShowJobs(run *github.WorkflowRun, jobs []*collector.Job, threshold time.Duration)
+	ShowJobs(run *collector.WorkflowRun, threshold time.Duration)
 	ShowRuns(runs []*collector.WorkflowRun, threshold time.Duration)
 }
 
 type Collector interface {
 	GetJobLog(ctx context.Context, input *collector.Input, jobID int64) ([]byte, error)
 	GetJob(ctx context.Context, logger *slog.Logger, input *collector.Input, jobID int64) (*collector.Job, error)
-	GetRun(ctx context.Context, logger *slog.Logger, input *collector.Input, runID int64, attempt int) (*github.WorkflowRun, []*collector.Job, error)
+	GetRun(ctx context.Context, logger *slog.Logger, input *collector.Input, runID int64, attempt int) (*collector.WorkflowRun, error)
 	ListRuns(ctx context.Context, logger *slog.Logger, input *collector.Input, maxCount int) ([]*collector.WorkflowRun, error)
 }
 

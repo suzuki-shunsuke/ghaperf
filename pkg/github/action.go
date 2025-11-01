@@ -24,7 +24,10 @@ const (
 	maxRedirects = 5
 )
 
-var errInvalidStatusCode = errors.New("invalid status code")
+var (
+	errInvalidStatusCode = errors.New("invalid status code")
+	ErrLogHasGone        = errors.New("log has gone")
+)
 
 func (c *Client) GetWorkflowJobByID(ctx context.Context, owner, repo string, jobID int64) (*WorkflowJob, error) {
 	job, _, err := c.actions.GetWorkflowJobByID(ctx, owner, repo, jobID)
