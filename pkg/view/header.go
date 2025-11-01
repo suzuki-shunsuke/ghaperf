@@ -20,7 +20,7 @@ type HeaderArg struct {
 	Config                  *config.Config
 }
 
-func (v *Viewer) ShowHeader(arg *HeaderArg) { //nolint:cyclop
+func (v *Viewer) ShowHeader(arg *HeaderArg) {
 	fmt.Fprintln(v.stdout, generatedByText)
 	var version string
 	if arg.Version == "" || arg.Version == unknownVersion {
