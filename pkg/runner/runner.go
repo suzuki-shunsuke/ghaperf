@@ -34,6 +34,7 @@ type GitHub interface {
 }
 
 type Viewer interface {
+	ShowHeader(arg *view.HeaderArg)
 	ShowJob(job *collector.Job, threshold time.Duration)
 	ShowGroups(groups []*parser.Group, threshold time.Duration)
 	ShowJobs(run *github.WorkflowRun, jobs []*collector.Job, threshold time.Duration)
@@ -47,29 +48,43 @@ type Collector interface {
 	ListRuns(ctx context.Context, logger *slog.Logger, input *collector.Input, maxCount int) ([]*collector.WorkflowRun, error)
 }
 
-func NewRunner(gh GitHub, stdout io.Writer, fs afero.Fs) *Runner {
+type Args struct {
+	Stdout io.Writer
+	Fs     afero.Fs
+}
+
+func NewRunner(gh GitHub, args *Args) *Runner {
 	return &Runner{
 		gh:        gh,
-		stdout:    stdout,
-		fs:        fs,
-		viewer:    view.New(stdout),
-		collector: collector.New(fs, gh),
+		stdout:    args.Stdout,
+		fs:        args.Fs,
+		viewer:    view.New(args.Stdout),
+		collector: collector.New(args.Fs, gh),
 	}
 }
 
 func (r *Runner) Run(ctx context.Context, logger *slog.Logger, input *collector.Input) error {
+	headerArg := &view.HeaderArg{
+		Version:                 input.Version,
+		Now:                     time.Now(),
+		Threshold:               input.Threshold,
+		ListWorkflowRunsOptions: input.ListWorkflowRunsOptions,
+		Count:                   input.WorkflowNumber,
+		WorkflowName:            input.WorkflowName,
+	}
 	if input.JobID != 0 {
 		job, err := r.collector.GetJob(ctx, logger, input, input.JobID)
 		if err != nil {
 			return fmt.Errorf("run job ID %d: %w", input.JobID, err)
 		}
+		r.viewer.ShowHeader(headerArg)
 		r.viewer.ShowJob(job, input.Threshold)
 		return nil
 	}
 	if input.RunID != 0 {
-		return r.runWithRunID(ctx, logger, input)
+		return r.runWithRunID(ctx, logger, input, headerArg)
 	}
-	return r.runs(ctx, logger, input)
+	return r.runs(ctx, logger, input, headerArg)
 }
 
 func (r *Runner) RunWithLogFile(input *collector.Input) error {
@@ -82,6 +97,12 @@ func (r *Runner) RunWithLogFile(input *collector.Input) error {
 	if err != nil {
 		return fmt.Errorf("parse a log file: %w", err)
 	}
+	r.viewer.ShowHeader(&view.HeaderArg{
+		Version:                 input.Version,
+		Now:                     time.Now(),
+		Threshold:               input.Threshold,
+		ListWorkflowRunsOptions: input.ListWorkflowRunsOptions,
+	})
 	r.viewer.ShowGroups(log.Groups, input.Threshold)
 	return nil
 }

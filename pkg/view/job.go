@@ -8,6 +8,8 @@ import (
 	"github.com/suzuki-shunsuke/ghaperf/pkg/collector"
 )
 
+const unknownVersion = "unknown"
+
 func (v *Viewer) ShowJob(j *collector.Job, threshold time.Duration) {
 	job := j.Job
 	slowSteps := getSlowSteps(job.Steps, threshold)

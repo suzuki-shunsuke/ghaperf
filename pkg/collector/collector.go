@@ -46,6 +46,7 @@ type Input struct {
 	WorkflowName            string
 	ListWorkflowRunsOptions *github.ListWorkflowRunsOptions
 	Config                  *config.Config
+	Version                 string
 }
 
 type Job struct {
