@@ -257,7 +257,8 @@ A GitHub access token is required to fetch workflow runs, jobs, and logs via the
 > It means the error message is wrong.
 
 **Required Permissions:**
-- Public repositories: No specific permissions needed
+- Public repositories
+  - Permissions to access action logs is required, but [they are ambiguous due to the bug of GitHub](https://github.com/orgs/community/discussions/24742). And there are sevel types of GitHub Access tokens, so it's a bit difficult to describe accurately
 - Private repositories: `Actions: Read` permission
 
 **Setup:**
