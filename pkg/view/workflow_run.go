@@ -14,7 +14,7 @@ type JobWithSteps struct {
 	Duration  time.Duration
 }
 
-func (v *Viewer) ShowJobs(run *collector.WorkflowRun, threshold time.Duration) {
+func (v *Viewer) ShowRun(run *collector.WorkflowRun, threshold time.Duration) {
 	arr := make([]*JobWithSteps, 0, len(run.Jobs))
 	for _, job := range run.Jobs {
 		if job.Job.GetStatus() != "completed" {
