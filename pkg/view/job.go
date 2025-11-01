@@ -26,7 +26,7 @@ func (v *Viewer) ShowJob(j *collector.Job, threshold time.Duration) { //nolint:f
 
 	for _, step := range slowSteps {
 		for _, group := range slowGroups {
-			step.Contain(group, threshold)
+			step.Contain(group)
 		}
 		sort.Slice(step.Groups, func(i, j int) bool {
 			return step.Groups[i].Duration() > step.Groups[j].Duration()

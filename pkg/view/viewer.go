@@ -41,12 +41,7 @@ func (s *Step) Duration() time.Duration {
 	return s.duration
 }
 
-func (s *Step) Contain(group *parser.Group, threshold time.Duration) {
-	if group.Duration() < threshold {
-		// The group is not slow
-		// Go to the next group
-		return
-	}
+func (s *Step) Contain(group *parser.Group) {
 	centerTime := group.StartTime().Add(group.Duration() / 2) //nolint:mnd
 	if s.StartTime.Before(centerTime) && s.EndTime.After(centerTime) {
 		// The group is contained in the step
