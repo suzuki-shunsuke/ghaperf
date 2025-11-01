@@ -12,7 +12,7 @@
 ## Quick Start
 
 1. [Install ghaperf](INSTALL.md)
-1. [(Optional) Set your GitHub Access token to avoid GitHub API rate limit and to access private repositories](#github-access-token)
+1. [Set your GitHub Access token to download action logs](#github-access-token)
 1. Run ghaperf
 
 ```sh
@@ -179,7 +179,7 @@ For complete usage documentation, see [USAGE.md](USAGE.md).
 
 ### Prerequisites
 
-A GitHub access token is required to avoid API rate limits and access private repositories. See [GitHub Access Token](#github-access-token) for details.
+A GitHub access token is required to download action logs. See [GitHub Access Token](#github-access-token) for details.
 
 ```sh
 export GITHUB_TOKEN=xxx
@@ -239,7 +239,22 @@ See the [example log file](testdata/log.txt) for format reference.
 ### GitHub Access Token
 
 A GitHub access token is required to fetch workflow runs, jobs, and logs via the GitHub API.
-An access token isn't required for public repositories, but it's recommended to avoid API rate limit.
+
+> [!WARNING]
+> Even if repositories are public, an access token is required.
+> This is a known issue of GitHub.
+> https://github.com/orgs/community/discussions/24742
+>
+> ```json
+> {
+>   "message": "Must have admin rights to Repository.",
+>   "documentation_url": "https://docs.github.com/rest/actions/workflow-jobs#download-job-logs-for-a-workflow-run",
+>   "status": "403"
+> }
+> ```
+>
+> The message says `Must have admin rights to Repository.`, but actually we confirmed no permission is required in public repositories.
+> It means the error message is wrong.
 
 **Required Permissions:**
 - Public repositories: No specific permissions needed
