@@ -26,108 +26,123 @@ ghaperf --repo aquaproj/aqua-registry --workflow test.yaml --count 10 --threshol
 <summary>Example Report Output</summary>
 
 ## Job: test / test / test (windows-latest)
-- Total Job Duration: 6m3s
-- The number of Job Executions: 10
-- Average Job Duration: 36s
-- Slowest jobs: [45s](https://github.com/aquaproj/aqua-registry/actions/runs/18985324625/job/54227585996), [44s](https://github.com/aquaproj/aqua-registry/actions/runs/18984012981/job/54223408471), [38s](https://github.com/aquaproj/aqua-registry/actions/runs/18984024497/job/54223445810)
+<table>
+<tr><td>Average Job Duration</td><td>33s (5m26s/10)</td></tr>
+<tr><td>Slowest Jobs</td><td><a href="https://github.com/aquaproj/aqua-registry/actions/runs/18987585604/job/54234368246">40s</a>, <a href="https://github.com/aquaproj/aqua-registry/actions/runs/18986937578/job/54232538653">35s</a>, <a href="https://github.com/aquaproj/aqua-registry/actions/runs/18985653020/job/54228560750">35s</a></td></tr>
+</table>
+
 ### Slow steps
-1. Run aquaproj/aqua-installer@ea518c135a02fc11ff8024364510c181a5c6b342: 14s (2m21s/10)
-    1. Run $(if($env:AQUA_ROOT_DIR) {echo $env:AQUA_ROOT_DIR} else {echo "$HOME/AppData/Local/aquaproj-aqua/bin"}) | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append: 9s (1m28s/10)
-    2. Run if [ "${SKIP_INSTALL_AQUA:-}" = true ] && command -v aqua >/dev/null; then: 5s (46s/10)
-2. Run actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8: 8s (1m15s/10)
-    1. Setting up auth: 2s (16s/7)
-    2. Fetching the repository: 2s (5s/2)
-3. Run aquaproj/registry-action/test@68f10339de561d67f9acea40b91dc36aa5011ea8: 6s (56s/10)
-    1. Run aqua i --test: 6s (34s/6)
-    2. Run aqua exec -- ci-info run | sed -E "s/^export //" >> "$GITHUB_ENV": 2s (17s/7)
-4. Set up job: 4s (37s/10)
+1. 13s (2m9s/10): Run aquaproj/aqua-installer@ea518c135a02fc11ff8024364510c181a5c6b342
+    1. 8s (1m23s/10): Run $(if($env:AQUA_ROOT_DIR) {echo $env:AQUA_ROOT_DIR} else {echo "$HOME/AppData/Local/aquaproj-aqua/bin"}) | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+    2. 5s (42s/9): Run if [ "${SKIP_INSTALL_AQUA:-}" = true ] && command -v aqua >/dev/null; then
+2. 7s (1m13s/10): Run actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+    1. 2s (16s/7): Setting up auth
+    2. 3s (3s/1): Fetching the repository
+3. 4s (36s/10): Run aquaproj/registry-action/test@68f10339de561d67f9acea40b91dc36aa5011ea8
+4. 4s (35s/10): Set up job
 ## Job: test / test / test (windows-latest, arm64)
-- Total Job Duration: 5m59s
-- The number of Job Executions: 10
-- Average Job Duration: 36s
-- Slowest jobs: [51s](https://github.com/aquaproj/aqua-registry/actions/runs/18984024497/job/54223445799), [40s](https://github.com/aquaproj/aqua-registry/actions/runs/18983245993/job/54220759743), [38s](https://github.com/aquaproj/aqua-registry/actions/runs/18985324625/job/54227586013)
+<table>
+<tr><td>Average Job Duration</td><td>32s (5m24s/10)</td></tr>
+<tr><td>Slowest Jobs</td><td><a href="https://github.com/aquaproj/aqua-registry/actions/runs/18987158767/job/54233211736">48s</a>, <a href="https://github.com/aquaproj/aqua-registry/actions/runs/18986103791/job/54230012684">39s</a>, <a href="https://github.com/aquaproj/aqua-registry/actions/runs/18986654682/job/54231704451">36s</a></td></tr>
+</table>
+
 ### Slow steps
-1. Run aquaproj/aqua-installer@ea518c135a02fc11ff8024364510c181a5c6b342: 14s (2m19s/10)
-    1. Run $(if($env:AQUA_ROOT_DIR) {echo $env:AQUA_ROOT_DIR} else {echo "$HOME/AppData/Local/aquaproj-aqua/bin"}) | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append: 9s (1m26s/10)
-    2. Run if [ "${SKIP_INSTALL_AQUA:-}" = true ] && command -v aqua >/dev/null; then: 5s (47s/10)
-2. Run actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8: 7s (1m14s/10)
-    1. Setting up auth: 3s (16s/6)
-    2. Fetching the repository: 3s (3s/1)
-3. Run aquaproj/registry-action/test@68f10339de561d67f9acea40b91dc36aa5011ea8: 6s (57s/10)
-    1. Run aqua i --test: 7s (29s/4)
-    2. Run aqua exec -- ci-info run | sed -E "s/^export //" >> "$GITHUB_ENV": 2s (14s/6)
-4. Set up job: 4s (41s/10)
+1. 14s (2m18s/10): Run aquaproj/aqua-installer@ea518c135a02fc11ff8024364510c181a5c6b342
+    1. 10s (1m30s/9): Run $(if($env:AQUA_ROOT_DIR) {echo $env:AQUA_ROOT_DIR} else {echo "$HOME/AppData/Local/aquaproj-aqua/bin"}) | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+    2. 4s (39s/9): Run if [ "${SKIP_INSTALL_AQUA:-}" = true ] && command -v aqua >/dev/null; then
+2. 7s (1m11s/10): Run actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+    1. 3s (17s/6): Setting up auth
+    2. 3s (3s/1): Getting Git version info
+    3. 2s (2s/1): Fetching the repository
+3. 4s (36s/10): Set up job
+4. 3s (30s/10): Run aquaproj/registry-action/test@68f10339de561d67f9acea40b91dc36aa5011ea8
 ## Job: test / test / test (macos-13)
-- Total Job Duration: 4m59s
-- The number of Job Executions: 10
-- Average Job Duration: 30s
-- Slowest jobs: [39s](https://github.com/aquaproj/aqua-registry/actions/runs/18984024497/job/54223445786), [36s](https://github.com/aquaproj/aqua-registry/actions/runs/18982948414/job/54219767595), [33s](https://github.com/aquaproj/aqua-registry/actions/runs/18985653020/job/54228560759)
+<table>
+<tr><td>Average Job Duration</td><td>23s (3m45s/10)</td></tr>
+<tr><td>Slowest Jobs</td><td><a href="https://github.com/aquaproj/aqua-registry/actions/runs/18985653020/job/54228560759">33s</a>, <a href="https://github.com/aquaproj/aqua-registry/actions/runs/18987158767/job/54233211747">31s</a>, <a href="https://github.com/aquaproj/aqua-registry/actions/runs/18986937578/job/54232538667">25s</a></td></tr>
+</table>
+
 ### Slow steps
-1. Run aquaproj/registry-action/test@68f10339de561d67f9acea40b91dc36aa5011ea8: 7s (1m13s/10)
-    1. Run aqua i --test: 7s (49s/7)
-    2. Run aqua exec -- ci-info run | sed -E "s/^export //" >> "$GITHUB_ENV": 2s (18s/8)
-2. Set up job: 7s (1m8s/10)
-3. Run actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8: 5s (53s/10)
-    1. Checking out the ref: 3s (20s/7)
-    2. Fetching the repository: 3s (3s/1)
-4. Run aquaproj/aqua-installer@ea518c135a02fc11ff8024364510c181a5c6b342: 5s (45s/10)
+1. 6s (1m3s/10): Set up job
+2. 6s (51s/9): Run aquaproj/registry-action/test@68f10339de561d67f9acea40b91dc36aa5011ea8
+    1. 5s (31s/6): Run aqua i --test
+    2. 2s (14s/6): Run aqua exec -- ci-info run | sed -E "s/^export //" >> "$GITHUB_ENV"
+3. 4s (36s/9): Run aquaproj/aqua-installer@ea518c135a02fc11ff8024364510c181a5c6b342
+4. 4s (34s/9): Run actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
 ## Job: test / test / test (macos-14)
-- Total Job Duration: 4m45s
-- The number of Job Executions: 10
-- Average Job Duration: 29s
-- Slowest jobs: [1m45s](https://github.com/aquaproj/aqua-registry/actions/runs/18985291460/job/54227488846), [23s](https://github.com/aquaproj/aqua-registry/actions/runs/18984024497/job/54223445788), [22s](https://github.com/aquaproj/aqua-registry/actions/runs/18985324625/job/54227585994)
+<table>
+<tr><td>Average Job Duration</td><td>20s (3m17s/10)</td></tr>
+<tr><td>Slowest Jobs</td><td><a href="https://github.com/aquaproj/aqua-registry/actions/runs/18986937578/job/54232538680">22s</a>, <a href="https://github.com/aquaproj/aqua-registry/actions/runs/18987158767/job/54233211744">21s</a>, <a href="https://github.com/aquaproj/aqua-registry/actions/runs/18986673543/job/54231758517">21s</a></td></tr>
+</table>
+
 ### Slow steps
-1. Set up job: 6s (1m0s/10)
-2. Run aquaproj/registry-action/test@68f10339de561d67f9acea40b91dc36aa5011ea8: 5s (45s/10)
-    1. Run aqua i --test: 4s (25s/7)
-    2. Run aqua exec -- ci-info run | sed -E "s/^export //" >> "$GITHUB_ENV": 2s (6s/3)
-3. Run aquaproj/aqua-installer@ea518c135a02fc11ff8024364510c181a5c6b342: 3s (30s/10)
-4. Run actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8: 3s (26s/10)
+1. 6s (58s/10): Set up job
+2. 4s (42s/10): Run aquaproj/registry-action/test@68f10339de561d67f9acea40b91dc36aa5011ea8
+    1. 3s (21s/7): Run aqua i --test
+    2. 2s (7s/3): Run aqua exec -- ci-info run | sed -E "s/^export //" >> "$GITHUB_ENV"
+3. 3s (32s/10): Run aquaproj/aqua-installer@ea518c135a02fc11ff8024364510c181a5c6b342
+4. 3s (25s/10): Run actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
 ## Job: test / lintnet / lintnet
-- Total Job Duration: 2m39s
-- The number of Job Executions: 10
-- Average Job Duration: 16s
-- Slowest jobs: [18s](https://github.com/aquaproj/aqua-registry/actions/runs/18985291460/job/54227470425), [18s](https://github.com/aquaproj/aqua-registry/actions/runs/18984024497/job/54223426855), [18s](https://github.com/aquaproj/aqua-registry/actions/runs/18982975753/job/54219833548)
+<table>
+<tr><td>Average Job Duration</td><td>15s (2m29s/10)</td></tr>
+<tr><td>Slowest Jobs</td><td><a href="https://github.com/aquaproj/aqua-registry/actions/runs/18986937578/job/54232530626">17s</a>, <a href="https://github.com/aquaproj/aqua-registry/actions/runs/18986654682/job/54231696170">17s</a>, <a href="https://github.com/aquaproj/aqua-registry/actions/runs/18986103791/job/54229999783">15s</a></td></tr>
+</table>
+
 ### Slow steps
-1. Run lintnet lint: 6s (1m2s/10)
-2. Run aquaproj/aqua-installer@ea518c135a02fc11ff8024364510c181a5c6b342: 3s (29s/10)
+1. 6s (56s/10): Run lintnet lint
+2. 3s (30s/10): Run aquaproj/aqua-installer@ea518c135a02fc11ff8024364510c181a5c6b342
+3. 2s (20s/10): Post Run actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
 ## Job: test / test / test (ubuntu-24.04-arm)
-- Total Job Duration: 2m18s
-- The number of Job Executions: 10
-- Average Job Duration: 14s
-- Slowest jobs: [17s](https://github.com/aquaproj/aqua-registry/actions/runs/18984615607/job/54225335036), [17s](https://github.com/aquaproj/aqua-registry/actions/runs/18984024497/job/54223445803), [16s](https://github.com/aquaproj/aqua-registry/actions/runs/18984012981/job/54223408487)
+<table>
+<tr><td>Average Job Duration</td><td>15s (2m29s/10)</td></tr>
+<tr><td>Slowest Jobs</td><td><a href="https://github.com/aquaproj/aqua-registry/actions/runs/18987158767/job/54233211763">18s</a>, <a href="https://github.com/aquaproj/aqua-registry/actions/runs/18986103791/job/54230012676">17s</a>, <a href="https://github.com/aquaproj/aqua-registry/actions/runs/18985946839/job/54229501665">17s</a></td></tr>
+</table>
+
 ### Slow steps
-1. Run aquaproj/registry-action/test@68f10339de561d67f9acea40b91dc36aa5011ea8: 4s (36s/10)
-2. Set up job: 3s (27s/10)
-3. Run aquaproj/aqua-installer@ea518c135a02fc11ff8024364510c181a5c6b342: 2s (22s/10)
+1. 3s (32s/10): Set up job
+2. 3s (32s/10): Run aquaproj/registry-action/test@68f10339de561d67f9acea40b91dc36aa5011ea8
+3. 3s (26s/10): Run aquaproj/aqua-installer@ea518c135a02fc11ff8024364510c181a5c6b342
 ## Job: test / test / test (ubuntu-24.04)
-- Total Job Duration: 2m10s
-- The number of Job Executions: 10
-- Average Job Duration: 13s
-- Slowest jobs: [18s](https://github.com/aquaproj/aqua-registry/actions/runs/18984024497/job/54223445796), [17s](https://github.com/aquaproj/aqua-registry/actions/runs/18985324625/job/54227586003), [17s](https://github.com/aquaproj/aqua-registry/actions/runs/18984012981/job/54223408467)
+<table>
+<tr><td>Average Job Duration</td><td>14s (2m16s/10)</td></tr>
+<tr><td>Slowest Jobs</td><td><a href="https://github.com/aquaproj/aqua-registry/actions/runs/18987158767/job/54233211734">18s</a>, <a href="https://github.com/aquaproj/aqua-registry/actions/runs/18986941589/job/54233657194">15s</a>, <a href="https://github.com/aquaproj/aqua-registry/actions/runs/18986654682/job/54231704444">15s</a></td></tr>
+</table>
+
 ### Slow steps
-1. Run aquaproj/registry-action/test@68f10339de561d67f9acea40b91dc36aa5011ea8: 4s (37s/10)
-2. Set up job: 3s (29s/10)
-3. Run aquaproj/aqua-installer@ea518c135a02fc11ff8024364510c181a5c6b342: 2s (20s/10)
+1. 3s (33s/10): Set up job
+2. 3s (32s/10): Run aquaproj/registry-action/test@68f10339de561d67f9acea40b91dc36aa5011ea8
+    1. 4s (4s/1): Run aqua i --test
+    2. 2s (2s/1): Run aqua exec -- ci-info run | sed -E "s/^export //" >> "$GITHUB_ENV"
 ## Job: test / ci-info / ci-info
-- Total Job Duration: 1m39s
-- The number of Job Executions: 10
-- Average Job Duration: 10s
-- Slowest jobs: [12s](https://github.com/aquaproj/aqua-registry/actions/runs/18985324625/job/54227570936), [12s](https://github.com/aquaproj/aqua-registry/actions/runs/18985291460/job/54227470381), [12s](https://github.com/aquaproj/aqua-registry/actions/runs/18984024497/job/54223426815)
+<table>
+<tr><td>Average Job Duration</td><td>10s (1m43s/10)</td></tr>
+<tr><td>Slowest Jobs</td><td><a href="https://github.com/aquaproj/aqua-registry/actions/runs/18987158767/job/54233199054">14s</a>, <a href="https://github.com/aquaproj/aqua-registry/actions/runs/18986103791/job/54229999767">12s</a>, <a href="https://github.com/aquaproj/aqua-registry/actions/runs/18985946839/job/54229488797">12s</a></td></tr>
+</table>
+
 ### Slow steps
-1. Run suzuki-shunsuke/ci-info-action/store@ceeb10dd50cd632db31e7eccf92cbbb6856f3191: 2s (23s/10)
-2. Run aquaproj/aqua-installer@ea518c135a02fc11ff8024364510c181a5c6b342: 2s (21s/10)
+1. 2s (22s/10): Run suzuki-shunsuke/ci-info-action/store@ceeb10dd50cd632db31e7eccf92cbbb6856f3191
+2. 2s (20s/10): Set up job
+3. 2s (20s/10): Run aquaproj/aqua-installer@ea518c135a02fc11ff8024364510c181a5c6b342
 ## Job: test / check-files / check-files
-- Total Job Duration: 47s
-- The number of Job Executions: 10
-- Average Job Duration: 5s
-- Slowest jobs: [7s](https://github.com/aquaproj/aqua-registry/actions/runs/18985324625/job/54227578964), [6s](https://github.com/aquaproj/aqua-registry/actions/runs/18983245993/job/54220752481), [5s](https://github.com/aquaproj/aqua-registry/actions/runs/18984012981/job/54223401351)
+<table>
+<tr><td>Average Job Duration</td><td>5s (53s/10)</td></tr>
+<tr><td>Slowest Jobs</td><td><a href="https://github.com/aquaproj/aqua-registry/actions/runs/18986673543/job/54231754113">7s</a>, <a href="https://github.com/aquaproj/aqua-registry/actions/runs/18985946839/job/54229494701">7s</a>, <a href="https://github.com/aquaproj/aqua-registry/actions/runs/18986649585/job/54231685141">6s</a></td></tr>
+</table>
+
 The job has no slow steps
 ## Job: test / path-filter
-- Total Job Duration: 38s
-- The number of Job Executions: 10
-- Average Job Duration: 4s
-- Slowest jobs: [5s](https://github.com/aquaproj/aqua-registry/actions/runs/18985324625/job/54227570885), [5s](https://github.com/aquaproj/aqua-registry/actions/runs/18984615607/job/54225313297), [5s](https://github.com/aquaproj/aqua-registry/actions/runs/18984024497/job/54223426756)
+<table>
+<tr><td>Average Job Duration</td><td>4s (40s/10)</td></tr>
+<tr><td>Slowest Jobs</td><td><a href="https://github.com/aquaproj/aqua-registry/actions/runs/18987585604/job/54234360739">5s</a>, <a href="https://github.com/aquaproj/aqua-registry/actions/runs/18986673543/job/54231748927">5s</a>, <a href="https://github.com/aquaproj/aqua-registry/actions/runs/18986654682/job/54231696160">5s</a></td></tr>
+</table>
+
+The job has no slow steps
+## Job: status-check
+<table>
+<tr><td>Average Job Duration</td><td>2s (2s/1)</td></tr>
+<tr><td>Slowest Jobs</td><td><a href="https://github.com/aquaproj/aqua-registry/actions/runs/18986941589/job/54233677718">2s</a>, <a href="https://github.com/aquaproj/aqua-registry/actions/runs/18987585604/job/54234395291">0s</a>, <a href="https://github.com/aquaproj/aqua-registry/actions/runs/18987158767/job/54233253944">0s</a></td></tr>
+</table>
+
 The job has no slow steps
 
 </details>

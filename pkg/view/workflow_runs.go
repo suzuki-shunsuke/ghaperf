@@ -123,14 +123,14 @@ func (v *Viewer) ShowRuns(runs []*collector.WorkflowRun, threshold time.Duration
 			return stepArr[i].Metric.Sum > stepArr[j].Metric.Sum
 		})
 		fmt.Fprintf(v.stdout, "## Job: %s\n", jm.Name)
-		fmt.Fprintf(v.stdout, "- Total Job Duration: %s\n", jm.Metric.Sum.Round(time.Second))
-		fmt.Fprintf(v.stdout, "- The number of Job Executions: %d\n", jm.Metric.Count)
-		fmt.Fprintf(v.stdout, "- Average Job Duration: %s\n", jm.Metric.Avg.Round(time.Second))
 		slowestJobStrs := make([]string, len(jm.SlowestJobs))
 		for i, job := range jm.SlowestJobs {
-			slowestJobStrs[i] = fmt.Sprintf("[%s](%s)", job.Duration(), job.Job.GetHTMLURL())
+			slowestJobStrs[i] = fmt.Sprintf(`<a href="%s">%s</a>`, job.Job.GetHTMLURL(), job.Duration())
 		}
-		fmt.Fprintf(v.stdout, "- Slowest jobs: %s\n", strings.Join(slowestJobStrs, ", "))
+		fmt.Fprintln(v.stdout, "<table>")
+		fmt.Fprintf(v.stdout, "<tr><td>Average Job Duration</td><td>%s (%s/%d)</td></tr>\n", jm.Metric.Avg.Round(time.Second), jm.Metric.Sum.Round(time.Second), jm.Metric.Count)
+		fmt.Fprintf(v.stdout, "<tr><td>Slowest Jobs</td><td>%s</td></tr>\n", strings.Join(slowestJobStrs, ", "))
+		fmt.Fprintf(v.stdout, "</table>\n\n")
 		slowSteps := make([]*StepMetric, 0, len(stepArr))
 		for _, sm := range stepArr {
 			if sm.Metric.Avg < threshold {
@@ -144,7 +144,7 @@ func (v *Viewer) ShowRuns(runs []*collector.WorkflowRun, threshold time.Duration
 		}
 		fmt.Fprintln(v.stdout, "### Slow steps")
 		for i, sm := range slowSteps {
-			fmt.Fprintf(v.stdout, "%d. %s: %s (%s/%d)\n", i+1, sm.Name, sm.Metric.Avg.Round(time.Second), sm.Metric.Sum, sm.Metric.Count)
+			fmt.Fprintf(v.stdout, "%d. %s (%s/%d): %s\n", i+1, sm.Metric.Avg.Round(time.Second), sm.Metric.Sum, sm.Metric.Count, sm.Name)
 			if len(sm.Groups) <= 1 {
 				continue
 			}
@@ -162,7 +162,7 @@ func (v *Viewer) ShowRuns(runs []*collector.WorkflowRun, threshold time.Duration
 				if gm.Metric.Avg < threshold {
 					continue
 				}
-				fmt.Fprintf(v.stdout, "    %d. %s: %s (%s/%d)\n", j+1, gm.Name, gm.Metric.Avg.Round(time.Second), gm.Metric.Sum.Round(time.Second), gm.Metric.Count)
+				fmt.Fprintf(v.stdout, "    %d. %s (%s/%d): %s\n", j+1, gm.Metric.Avg.Round(time.Second), gm.Metric.Sum.Round(time.Second), gm.Metric.Count, gm.Name)
 			}
 		}
 	}
