@@ -28,9 +28,10 @@ OPTIONS:
    --workflow-created <date range>        The workflow run created date range
    --workflow-status <status>             The workflow run status
    --config <path>                        The config file path
+   --init                                 Initialize the config file
    --help, -h                             Show help
    --version, -v                          Show version
 
 VERSION:
-   0.0.4
+   v0.1.0
 ```
