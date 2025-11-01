@@ -276,18 +276,18 @@
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/suzuki-shunsuke/ghaperf/v0.0.4/ghaperf_darwin_arm64.tar.gz",
-      "checksum": "010E7EDB22C41ADD88F2F0371E8B61F3928FECE178CDE34E03690287BE7C02C4",
+      "id": "github_release/github.com/suzuki-shunsuke/ghaperf/v0.1.0/ghaperf_darwin_arm64.tar.gz",
+      "checksum": "18E0EC5F933F2F12043AF0E0E3B4F5C64956B71F1D482465EFBFE174D50959DC",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/suzuki-shunsuke/ghaperf/v0.0.4/ghaperf_linux_amd64.tar.gz",
-      "checksum": "56A5E4149A19799C7BE52B92722C6AD58CC25334387E8B22CD23BAF315B95767",
+      "id": "github_release/github.com/suzuki-shunsuke/ghaperf/v0.1.0/ghaperf_linux_amd64.tar.gz",
+      "checksum": "F019E9B6C52ACE7BA846029375206CE5AF553CE3B221FFC6CC0F153FB05C66FE",
       "algorithm": "sha256"
     },
     {
-      "id": "github_release/github.com/suzuki-shunsuke/ghaperf/v0.0.4/ghaperf_linux_arm64.tar.gz",
-      "checksum": "A10827F4B458D847AFF52FAD42AE9A2AB882D15BDF17376C5D6141EDBBD3006C",
+      "id": "github_release/github.com/suzuki-shunsuke/ghaperf/v0.1.0/ghaperf_linux_arm64.tar.gz",
+      "checksum": "8DAC7FABFE5EB95C436206F7324173D539DD97EEE34DCE2E23873EE7923D63AC",
       "algorithm": "sha256"
     },
     {
