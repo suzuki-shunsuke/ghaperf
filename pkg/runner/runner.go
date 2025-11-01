@@ -37,7 +37,7 @@ type Viewer interface {
 	ShowHeader(arg *view.HeaderArg)
 	ShowJob(job *collector.Job, threshold time.Duration)
 	ShowGroups(groups []*parser.Group, threshold time.Duration)
-	ShowJobs(run *collector.WorkflowRun, threshold time.Duration)
+	ShowRun(run *collector.WorkflowRun, threshold time.Duration)
 	ShowRuns(runs []*collector.WorkflowRun, threshold time.Duration)
 }
 

@@ -21,7 +21,7 @@ func (r *Runner) runWithRunID(ctx context.Context, logger *slog.Logger, input *c
 		slogerr.WithError(logger, err).Warn("get run by run id")
 	}
 	r.viewer.ShowHeader(headerArg)
-	r.viewer.ShowJobs(run, input.Threshold)
+	r.viewer.ShowRun(run, input.Threshold)
 	return nil
 }
 
