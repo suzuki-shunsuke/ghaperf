@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"regexp"
 
 	"github.com/spf13/pflag"
 	"github.com/suzuki-shunsuke/ghaperf/pkg/controller"
@@ -71,9 +72,15 @@ func parseFlags(f *controller.InputRun) {
 	f.Args = pflag.Args()
 }
 
+var digitPrefix = regexp.MustCompile("^[0-9]")
+
 func Run(ctx context.Context, logger *slog.Logger, logLevel *slog.LevelVar, arg *controller.Arg) error {
 	inputRun := &controller.InputRun{}
 	parseFlags(inputRun)
+
+	if digitPrefix.MatchString(arg.Version) {
+		arg.Version = "v" + arg.Version
+	}
 
 	if inputRun.Help {
 		fmt.Fprintf(arg.Stdout, help, arg.Version)

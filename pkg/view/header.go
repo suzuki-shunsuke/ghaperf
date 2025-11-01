@@ -26,7 +26,7 @@ func (v *Viewer) ShowHeader(arg *HeaderArg) {
 	if arg.Version == "" || arg.Version == unknownVersion {
 		version = unknownVersion
 	} else {
-		version = fmt.Sprintf(`<a href="https://github.com/suzuki-shunsuke/ghaperf/releases/tag/v%s">v%s</a>`, arg.Version, arg.Version)
+		version = fmt.Sprintf(`<a href="https://github.com/suzuki-shunsuke/ghaperf/releases/tag/%s">%s</a>`, arg.Version, arg.Version)
 	}
 	fmt.Fprintln(v.stdout, "<table>")
 	fmt.Fprintf(v.stdout, "<tr><td>ghaperf version</td><td>%s</td></tr>\n", version)
