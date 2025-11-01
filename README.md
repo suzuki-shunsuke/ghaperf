@@ -272,6 +272,14 @@ ghaperf reports steps and log groups that exceed the specified threshold:
 Use configuration files to filter jobs by job name and normalize job names.
 All settings are optional.
 
+Scaffold the configuration file:
+
+```sh
+ghaperf --init # Generate ghaperf.yaml
+```
+
+Pass the configuration file:
+
 ```sh
 ghperf --config <configuration file path> ...
 ```

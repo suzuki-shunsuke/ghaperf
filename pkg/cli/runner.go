@@ -35,6 +35,7 @@ OPTIONS:
    --workflow-created <date range>        The workflow run created date range
    --workflow-status <status>             The workflow run status
    --config <path>                        The config file path
+   --init                                 Initialize the config file
    --help, -h                             Show help
    --version, -v                          Show version
 
@@ -55,6 +56,7 @@ func parseFlags(f *controller.InputRun) {
 	pflag.StringVar(&f.LogFile, "log-file", "", "log file")
 	pflag.BoolVar(&f.EnableGHTKN, "ghtkn", false, "Enable the integration with ghtkn")
 	pflag.BoolVarP(&f.Help, "help", "h", false, "Show help")
+	pflag.BoolVar(&f.Init, "init", false, "Initialize the config file")
 	pflag.BoolVarP(&f.Version, "version", "v", false, "Show version")
 	pflag.IntVar(&f.WorkflowNumber, "count", 100, "the number of workflow runs") //nolint:mnd
 	pflag.StringVar(&f.WorkflowName, "workflow", "", "the workflow name")
