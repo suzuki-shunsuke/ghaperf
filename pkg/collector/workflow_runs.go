@@ -10,8 +10,9 @@ import (
 )
 
 type WorkflowRun struct {
-	Run  *github.WorkflowRun
-	Jobs []*Job
+	Run        *github.WorkflowRun
+	Jobs       []*Job
+	LogHasGone bool
 }
 
 func (r *Collector) ListRuns(ctx context.Context, logger *slog.Logger, input *Input, maxCount int) ([]*WorkflowRun, error) {

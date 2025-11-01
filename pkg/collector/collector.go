@@ -54,6 +54,7 @@ type Job struct {
 	Groups         []*parser.Group
 	duration       time.Duration
 	NormalizedName string
+	LogHasGone     bool
 }
 
 func (j *Job) Duration() time.Duration {

@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/suzuki-shunsuke/ghaperf/pkg/collector"
-	"github.com/suzuki-shunsuke/ghaperf/pkg/github"
 )
 
 type JobWithSteps struct {
@@ -15,9 +14,9 @@ type JobWithSteps struct {
 	Duration  time.Duration
 }
 
-func (v *Viewer) ShowJobs(run *github.WorkflowRun, jobs []*collector.Job, threshold time.Duration) {
-	arr := make([]*JobWithSteps, 0, len(jobs))
-	for _, job := range jobs {
+func (v *Viewer) ShowJobs(run *collector.WorkflowRun, threshold time.Duration) {
+	arr := make([]*JobWithSteps, 0, len(run.Jobs))
+	for _, job := range run.Jobs {
 		if job.Job.GetStatus() != "completed" {
 			continue
 		}
@@ -34,11 +33,14 @@ func (v *Viewer) ShowJobs(run *github.WorkflowRun, jobs []*collector.Job, thresh
 		return arr[i].Duration > arr[j].Duration
 	})
 	fmt.Fprintln(v.stdout, "<table>")
-	fmt.Fprintf(v.stdout, `<tr><td>Workflow Run Name</td><td><a href="%s">%s</a></td></tr>`+"\n", run.GetHTMLURL(), run.GetName())
-	fmt.Fprintf(v.stdout, "<tr><td>Workflow Run ID</td><td>%d</td></tr>\n", run.GetID())
-	fmt.Fprintf(v.stdout, "<tr><td>Workflow Run Status</td><td>%s</td></tr>\n", run.GetStatus())
-	fmt.Fprintf(v.stdout, "<tr><td>Workflow Run Conclusion</td><td>%s</td></tr>\n", run.GetConclusion())
+	fmt.Fprintf(v.stdout, `<tr><td>Workflow Run Name</td><td><a href="%s">%s</a></td></tr>`+"\n", run.Run.GetHTMLURL(), run.Run.GetName())
+	fmt.Fprintf(v.stdout, "<tr><td>Workflow Run ID</td><td>%d</td></tr>\n", run.Run.GetID())
+	fmt.Fprintf(v.stdout, "<tr><td>Workflow Run Status</td><td>%s</td></tr>\n", run.Run.GetStatus())
+	fmt.Fprintf(v.stdout, "<tr><td>Workflow Run Conclusion</td><td>%s</td></tr>\n", run.Run.GetConclusion())
 	fmt.Fprintf(v.stdout, "</table>\n\n")
+	if run.LogHasGone {
+		v.ShowLogHasGone()
+	}
 	for _, job := range arr {
 		v.ShowJob(job.Job, threshold)
 	}

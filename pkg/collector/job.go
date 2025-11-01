@@ -37,7 +37,8 @@ func (c *Collector) GetJob(ctx context.Context, logger *slog.Logger, input *Inpu
 	if err != nil {
 		slogerr.WithError(logger, err).Error("get a job log", logArgs...)
 		return &Job{
-			Job: job,
+			Job:        job,
+			LogHasGone: errors.Is(err, github.ErrLogHasGone),
 		}, nil
 	}
 	log, err := parser.Parse(bytes.NewBuffer(jobLog))

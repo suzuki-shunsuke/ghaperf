@@ -20,16 +20,22 @@ import (
 
 const statusCompleted = "completed"
 
-func (r *Collector) GetRun(ctx context.Context, logger *slog.Logger, input *Input, runID int64, attempt int) (*github.WorkflowRun, []*Job, error) {
+func (r *Collector) GetRun(ctx context.Context, logger *slog.Logger, input *Input, runID int64, attempt int) (*WorkflowRun, error) {
 	run, err := r.getRun(ctx, logger, input, runID, attempt)
 	if err != nil {
-		return nil, nil, fmt.Errorf("get a workflow run: %w", err)
+		return nil, fmt.Errorf("get a workflow run: %w", err)
 	}
 	jobs, err := r.getJobsAndLogs(ctx, logger, input, run)
 	if err != nil {
-		return nil, nil, fmt.Errorf("get jobs: %w", err)
+		return &WorkflowRun{
+			Run:        run,
+			LogHasGone: errors.Is(err, github.ErrLogHasGone),
+		}, fmt.Errorf("get jobs: %w", err)
 	}
-	return run, jobs, nil
+	return &WorkflowRun{
+		Run:  run,
+		Jobs: jobs,
+	}, nil
 }
 
 func (r *Collector) getJobsAndLogs(ctx context.Context, logger *slog.Logger, input *Input, run *github.WorkflowRun) ([]*Job, error) {
@@ -63,7 +69,7 @@ func (r *Collector) getJobsAndLogs(ctx context.Context, logger *slog.Logger, inp
 	}
 	files, err := r.gh.GetWorkflowRunLogs(ctx, input.RepoOwner, input.RepoName, run.GetID(), run.GetRunAttempt())
 	if err != nil {
-		return nil, fmt.Errorf("get workflow run logs: %w", err)
+		return slices.Collect(maps.Values(jobM)), err
 	}
 	r.cacheAndParseLogs(logger, files, logCacheDir, logCacheFile, jobM)
 	return slices.Collect(maps.Values(jobM)), nil

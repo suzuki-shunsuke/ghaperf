@@ -10,7 +10,7 @@ import (
 
 const unknownVersion = "unknown"
 
-func (v *Viewer) ShowJob(j *collector.Job, threshold time.Duration) {
+func (v *Viewer) ShowJob(j *collector.Job, threshold time.Duration) { //nolint:funlen
 	job := j.Job
 	slowSteps := getSlowSteps(job.Steps, threshold)
 	sort.Slice(slowSteps, func(i, j int) bool {
@@ -33,21 +33,29 @@ func (v *Viewer) ShowJob(j *collector.Job, threshold time.Duration) {
 		})
 	}
 
-	firstStepStartedAt := job.Steps[0].GetStartedAt().Time
-	lastStepCompletedAt := job.Steps[len(job.Steps)-1].GetCompletedAt().Time
-
 	fmt.Fprintf(v.stdout, "## Job: %s\n", job.GetName())
-
 	fmt.Fprintln(v.stdout, "<table>")
 	fmt.Fprintf(v.stdout, `<tr><td>Job ID</td><td><a href="%s">%d</a></td></tr>`+"\n", job.GetHTMLURL(), job.GetID())
 	fmt.Fprintf(v.stdout, "<tr><td>Job Status</td><td>%s</td></tr>\n", job.GetStatus())
 	fmt.Fprintf(v.stdout, "<tr><td>Job Conclusion</td><td>%s</td></tr>\n", job.GetConclusion())
 	fmt.Fprintf(v.stdout, "<tr><td>Job Duration</td><td>%s</td></tr>\n", j.Duration())
-	fmt.Fprintf(v.stdout, "<tr><td>All Steps Duration</td><td>%s</td></tr>\n", allStepsDuration.Round(time.Second))
-	fmt.Fprintf(v.stdout, "<tr><td>Setup Job Duration</td><td>%s</td></tr>\n", firstStepStartedAt.Sub(job.StartedAt.Time).Round(time.Second))
-	fmt.Fprintf(v.stdout, "<tr><td>Cleanup Job Duration</td><td>%s</td></tr>\n", job.GetCompletedAt().Sub(lastStepCompletedAt).Round(time.Second))
-	fmt.Fprintf(v.stdout, "<tr><td>Steps Overhead</td><td>%s</td></tr>\n", (lastStepCompletedAt.Sub(firstStepStartedAt) - allStepsDuration).Round(time.Second))
+
+	if len(job.Steps) != 0 {
+		firstStepStartedAt := job.Steps[0].GetStartedAt().Time
+		lastStepCompletedAt := job.Steps[len(job.Steps)-1].GetCompletedAt().Time
+
+		fmt.Fprintf(v.stdout, "<tr><td>All Steps Duration</td><td>%s</td></tr>\n", allStepsDuration.Round(time.Second))
+		fmt.Fprintf(v.stdout, "<tr><td>Setup Job Duration</td><td>%s</td></tr>\n", firstStepStartedAt.Sub(job.StartedAt.Time).Round(time.Second))
+		fmt.Fprintf(v.stdout, "<tr><td>Cleanup Job Duration</td><td>%s</td></tr>\n", job.GetCompletedAt().Sub(lastStepCompletedAt).Round(time.Second))
+		fmt.Fprintf(v.stdout, "<tr><td>Steps Overhead</td><td>%s</td></tr>\n", (lastStepCompletedAt.Sub(firstStepStartedAt) - allStepsDuration).Round(time.Second))
+	}
+
 	fmt.Fprintf(v.stdout, "</table>\n\n")
+
+	if j.LogHasGone {
+		v.ShowLogHasGone()
+		return
+	}
 
 	if len(slowSteps) == 0 {
 		fmt.Fprintf(v.stdout, "The job %s has no slow steps\n", job.GetName())
@@ -64,4 +72,9 @@ func (v *Viewer) ShowJob(j *collector.Job, threshold time.Duration) {
 			fmt.Fprintf(v.stdout, "   %d. %s: %s\n", j+1, group.Duration().Round(time.Second), group.Name)
 		}
 	}
+}
+
+func (v *Viewer) ShowLogHasGone() {
+	fmt.Fprintln(v.stdout, "> [!CAUTION]")
+	fmt.Fprintln(v.stdout, "> [Log has gone](https://docs.github.com/en/organizations/managing-organization-settings/configuring-the-retention-period-for-github-actions-artifacts-and-logs-in-your-organization)")
 }

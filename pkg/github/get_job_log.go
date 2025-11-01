@@ -12,8 +12,12 @@ import (
 // GetWorkflowJobLogs downloads the logs for a workflow job.
 // It returns an io.ReadCloser which must be closed by the caller.
 func (c *Client) GetWorkflowJobLogs(ctx context.Context, owner, repo string, jobID int64) (io.ReadCloser, error) {
-	link, _, err := c.actions.GetWorkflowJobLogs(ctx, owner, repo, jobID, maxRedirects)
+	link, res, err := c.actions.GetWorkflowJobLogs(ctx, owner, repo, jobID, maxRedirects)
 	if err != nil {
+		if res.StatusCode == http.StatusGone {
+			defer res.Body.Close()
+			return nil, fmt.Errorf("download workflow job logs: %w", slogerr.With(ErrLogHasGone, "status_code", res.StatusCode))
+		}
 		return nil, fmt.Errorf("get workflow job logs redirect URL: %w", err)
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, link.String(), nil)
