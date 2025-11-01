@@ -253,8 +253,7 @@ A GitHub access token is required to fetch workflow runs, jobs, and logs via the
 > }
 > ```
 >
-> The message says `Must have admin rights to Repository.`, but actually we confirmed no permission is required in public repositories.
-> It means the error message is wrong.
+> The message says `Must have admin rights to Repository.`, but actually we confirmed the message is wrong because non admin user can download logs.
 
 **Required Permissions:**
 - Public repositories
