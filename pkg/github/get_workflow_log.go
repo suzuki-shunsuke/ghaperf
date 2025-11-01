@@ -28,8 +28,11 @@ func (c *Client) download(ctx context.Context, link string) (*http.Response, err
 func (c *Client) GetWorkflowRunLogs(ctx context.Context, owner, repo string, runID int64, attempt int) ([]*zip.File, error) {
 	link, res, err := c.actions.GetWorkflowRunAttemptLogs(ctx, owner, repo, runID, attempt, maxRedirects)
 	if err != nil {
+		if res == nil {
+			return nil, fmt.Errorf("get workflow run logs redirect URL: %w", err)
+		}
 		if res.StatusCode == http.StatusGone {
-			return nil, fmt.Errorf("download workflow run logs: %w", slogerr.With(ErrLogHasGone, "status_code", res.StatusCode))
+			return nil, fmt.Errorf("get workflow run logs redirect URL: %w", slogerr.With(ErrLogHasGone, "status_code", res.StatusCode))
 		}
 		return nil, fmt.Errorf("get workflow run logs redirect URL: %w", err)
 	}

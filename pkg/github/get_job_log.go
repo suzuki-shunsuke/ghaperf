@@ -14,9 +14,12 @@ import (
 func (c *Client) GetWorkflowJobLogs(ctx context.Context, owner, repo string, jobID int64) (io.ReadCloser, error) {
 	link, res, err := c.actions.GetWorkflowJobLogs(ctx, owner, repo, jobID, maxRedirects)
 	if err != nil {
+		if res == nil {
+			return nil, fmt.Errorf("get workflow job logs redirect URL: %w", err)
+		}
 		if res.StatusCode == http.StatusGone {
 			defer res.Body.Close()
-			return nil, fmt.Errorf("download workflow job logs: %w", slogerr.With(ErrLogHasGone, "status_code", res.StatusCode))
+			return nil, fmt.Errorf("get workflow job logs redirect URL: %w", slogerr.With(ErrLogHasGone, "status_code", res.StatusCode))
 		}
 		return nil, fmt.Errorf("get workflow job logs redirect URL: %w", err)
 	}
