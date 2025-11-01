@@ -65,8 +65,13 @@ func (c *Controller) Run(ctx context.Context, logger *slog.Logger, logLevelVar *
 		return err
 	}
 
+	rArgs := &runner.Args{
+		Stdout: arg.Stdout,
+		Fs:     arg.Fs,
+	}
+
 	if inputRun.LogFile != "" {
-		if err := runner.NewRunner(nil, arg.Stdout, arg.Fs).RunWithLogFile(input); err != nil {
+		if err := runner.NewRunner(nil, rArgs).RunWithLogFile(input); err != nil {
 			return fmt.Errorf("run with log file: %w", err)
 		}
 		return nil
@@ -79,7 +84,7 @@ func (c *Controller) Run(ctx context.Context, logger *slog.Logger, logLevelVar *
 	if err != nil {
 		return fmt.Errorf("create GitHub client: %w", err)
 	}
-	if err := runner.NewRunner(gh, arg.Stdout, arg.Fs).Run(ctx, logger, input); err != nil {
+	if err := runner.NewRunner(gh, rArgs).Run(ctx, logger, input); err != nil {
 		return err //nolint:wrapcheck
 	}
 	return nil
@@ -99,6 +104,7 @@ func (c *Controller) getInput(input *InputRun, arg *Arg) (*collector.Input, erro
 		return &collector.Input{
 			Threshold: threshold,
 			LogFile:   input.LogFile,
+			Version:   arg.Version,
 		}, nil
 	}
 
@@ -132,6 +138,7 @@ func (c *Controller) getInput(input *InputRun, arg *Arg) (*collector.Input, erro
 		WorkflowName:            input.WorkflowName,
 		ListWorkflowRunsOptions: input.ListWorkflowRunsOptions,
 		Config:                  cfg,
+		Version:                 arg.Version,
 	}, nil
 }
 
