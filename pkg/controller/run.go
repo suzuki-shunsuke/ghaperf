@@ -151,9 +151,6 @@ func readConfig(fs afero.Fs, path string, cfg *config.Config) error {
 	if err := config.Read(fs, path, cfg); err != nil {
 		return fmt.Errorf("read config file: %w", err)
 	}
-	if err := cfg.Validate(); err != nil {
-		return fmt.Errorf("validate config file: %w", err)
-	}
 	return nil
 }
 

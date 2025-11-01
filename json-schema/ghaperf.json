@@ -1,9 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/suzuki-shunsuke/ghaperf/pkg/config/config",
-  "$ref": "#/$defs/Config",
+  "$id": "https://github.com/suzuki-shunsuke/ghaperf/pkg/config/raw-config",
+  "$ref": "#/$defs/RawConfig",
   "$defs": {
-    "Config": {
+    "RawConfig": {
       "properties": {
         "job_names": {
           "items": {
