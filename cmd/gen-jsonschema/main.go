@@ -15,7 +15,7 @@ func main() {
 }
 
 func core() error {
-	if err := jsonschema.Write(&config.Config{}, "json-schema/ghaperf.json"); err != nil {
+	if err := jsonschema.Write(&config.RawConfig{}, "json-schema/ghaperf.json"); err != nil {
 		return fmt.Errorf("create or update a JSON Schema: %w", err)
 	}
 	return nil

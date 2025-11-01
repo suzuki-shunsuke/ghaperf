@@ -2,7 +2,7 @@ package config
 
 import (
 	"fmt"
-	"path"
+	"regexp"
 
 	"github.com/spf13/afero"
 	"github.com/suzuki-shunsuke/slog-error/slogerr"
@@ -10,41 +10,24 @@ import (
 )
 
 type Config struct {
-	// job name glob patterns to include
-	JobNames []string `json:"job_names,omitempty" yaml:"job_names,omitempty"`
-	// job name glob patterns to exclude
-	ExcludedJobNames []string `json:"excluded_job_names,omitempty" yaml:"excluded_job_names,omitempty"`
-	// original job name glob pattern => normalized job name
-	JobNameMappings map[string]string `json:"job_name_mappings,omitempty" yaml:"job_name_mappings,omitempty"`
+	JobNames         []*regexp.Regexp
+	ExcludedJobNames []*regexp.Regexp
+	JobNameMappings  map[*regexp.Regexp]string
 }
 
-func (c *Config) Validate() error {
-	for _, pattern := range c.JobNames {
-		if _, err := path.Match(pattern, "test"); err != nil {
-			return fmt.Errorf("invalid job name pattern: %w", slogerr.With(err, "pattern", pattern))
-		}
-	}
-	for _, pattern := range c.ExcludedJobNames {
-		if _, err := path.Match(pattern, "test"); err != nil {
-			return fmt.Errorf("invalid job name pattern: %w", slogerr.With(err, "pattern", pattern))
-		}
-	}
-	for pattern := range c.JobNameMappings {
-		if _, err := path.Match(pattern, "test"); err != nil {
-			return fmt.Errorf("invalid job name pattern: %w", slogerr.With(err, "pattern", pattern))
-		}
-	}
-	return nil
+type RawConfig struct {
+	// job name regular expressions to include
+	JobNames []string `json:"job_names,omitempty" yaml:"job_names,omitempty"`
+	// job name regular expressions to exclude
+	ExcludedJobNames []string `json:"excluded_job_names,omitempty" yaml:"excluded_job_names,omitempty"`
+	// original job name regular expression => normalized job name
+	JobNameMappings map[string]string `json:"job_name_mappings,omitempty" yaml:"job_name_mappings,omitempty"`
 }
 
 func (c *Config) Include(name string) bool {
 	if len(c.ExcludedJobNames) > 0 {
 		for _, pattern := range c.ExcludedJobNames {
-			matched, err := path.Match(pattern, name)
-			if err != nil {
-				continue
-			}
-			if matched {
+			if pattern.MatchString(name) {
 				return false
 			}
 		}
@@ -54,11 +37,7 @@ func (c *Config) Include(name string) bool {
 		return true
 	}
 	for _, pattern := range c.JobNames {
-		matched, err := path.Match(pattern, name)
-		if err != nil {
-			continue
-		}
-		if matched {
+		if pattern.MatchString(name) {
 			return true
 		}
 	}
@@ -67,9 +46,7 @@ func (c *Config) Include(name string) bool {
 
 func (c *Config) NormalizeJobName(name string) string {
 	for pattern, mapped := range c.JobNameMappings {
-		if matched, err := path.Match(pattern, name); err != nil {
-			continue
-		} else if matched {
+		if matched := pattern.MatchString(name); matched {
 			return mapped
 		}
 	}
@@ -81,8 +58,33 @@ func Read(fs afero.Fs, path string, cfg *Config) error {
 	if err != nil {
 		return fmt.Errorf("read a configuration file: %w", err)
 	}
-	if err := yaml.Unmarshal(b, cfg); err != nil {
+	rCfg := &RawConfig{}
+	if err := yaml.Unmarshal(b, rCfg); err != nil {
 		return fmt.Errorf("unmarshal a configuration file: %w", err)
+	}
+	cfg.JobNames = make([]*regexp.Regexp, len(rCfg.JobNames))
+	for i, pattern := range rCfg.JobNames {
+		re, err := regexp.Compile(pattern)
+		if err != nil {
+			return fmt.Errorf("compile job name pattern: %w", slogerr.With(err, "pattern", pattern))
+		}
+		cfg.JobNames[i] = re
+	}
+	cfg.ExcludedJobNames = make([]*regexp.Regexp, len(rCfg.ExcludedJobNames))
+	for i, pattern := range rCfg.ExcludedJobNames {
+		re, err := regexp.Compile(pattern)
+		if err != nil {
+			return fmt.Errorf("compile excluded job name pattern: %w", slogerr.With(err, "pattern", pattern))
+		}
+		cfg.ExcludedJobNames[i] = re
+	}
+	cfg.JobNameMappings = make(map[*regexp.Regexp]string, len(rCfg.JobNameMappings))
+	for original, mapped := range rCfg.JobNameMappings {
+		re, err := regexp.Compile(original)
+		if err != nil {
+			return fmt.Errorf("compile job name mapping: %w", slogerr.With(err, "original", original, "mapped", mapped))
+		}
+		cfg.JobNameMappings[re] = mapped
 	}
 	return nil
 }

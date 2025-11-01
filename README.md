@@ -279,23 +279,23 @@ ghperf --config <configuration file path> ...
 e.g.
 
 ```yaml
-# Only analyze jobs matching these glob patterns
+# Only analyze jobs matching these regular expressions
 job_names:
-  - "test / test / test *"
+  - "test / test / test .*"
 
-# Exclude jobs matching these glob patterns
+# Exclude jobs matching these regular expressions
 # excluded_job_names:
-#   - "test / test / test *"
+#   - "test / test / test .*"
 
 # Normalize matrix job names for aggregation
 job_name_mappings:
-  "test / test / test *": "test / test / test"
+  "test / test / test .*": "test / test / test"
 ```
 
 **Available Fields:**
-- `job_names`: List of glob patterns - only matching jobs are analyzed
-- `excluded_job_names`: List of glob patterns - matching jobs are excluded
-- `job_name_mappings`: Map of glob patterns to normalized names for matrix jobs
+- `job_names`: List of regular expressions - only matching jobs are analyzed
+- `excluded_job_names`: List of regular expressions - matching jobs are excluded
+- `job_name_mappings`: Map of regular expressions to normalized names for matrix jobs and old job names
 
 **JSON Schema and Validation:**
 
