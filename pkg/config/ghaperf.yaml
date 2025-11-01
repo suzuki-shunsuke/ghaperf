@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/suzuki-shunsuke/ghaperf/main/json-schema/ghaperf.json
+# Only analyze jobs matching these regular expressions
+# job_names:
+#   - "test / test / test .*"
+
+# Exclude jobs matching these regular expressions
+# excluded_job_names:
+#   - "test / test / test .*"
+
+# Normalize matrix job names for aggregation
+# job_name_mappings:
+#   "test / test / test .*": "test / test / test"
+job_name_mappings: {}

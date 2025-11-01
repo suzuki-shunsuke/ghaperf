@@ -31,6 +31,7 @@ type InputRun struct {
 	Args                    []string
 	EnableGHTKN             bool
 	Help                    bool
+	Init                    bool
 	Version                 bool
 	ListWorkflowRunsOptions *github.ListWorkflowRunsOptions
 	WorkflowNumber          int
@@ -60,6 +61,14 @@ func (c *Controller) Run(ctx context.Context, logger *slog.Logger, logLevelVar *
 	if err := setLogLevel(logLevelVar, inputRun.LogLevel, arg.Getenv); err != nil {
 		return err
 	}
+
+	if inputRun.Init {
+		if err := config.Init(arg.Fs, "ghaperf.yaml"); err != nil {
+			return fmt.Errorf("initialize config file: %w", err)
+		}
+		return nil
+	}
+
 	input, err := c.getInput(inputRun, arg)
 	if err != nil {
 		return err

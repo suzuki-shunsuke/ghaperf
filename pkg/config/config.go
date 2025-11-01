@@ -1,6 +1,7 @@
 package config
 
 import (
+	_ "embed"
 	"fmt"
 	"regexp"
 
@@ -85,6 +86,23 @@ func Read(fs afero.Fs, path string, cfg *Config) error {
 			return fmt.Errorf("compile job name mapping: %w", slogerr.With(err, "original", original, "mapped", mapped))
 		}
 		cfg.JobNameMappings[re] = mapped
+	}
+	return nil
+}
+
+//go:embed ghaperf.yaml
+var initConfigContent []byte
+
+const filePermission = 0o644
+
+func Init(fs afero.Fs, path string) error {
+	if f, err := afero.Exists(fs, path); err != nil {
+		return fmt.Errorf("check existence of a config file: %w", err)
+	} else if f {
+		return nil
+	}
+	if err := afero.WriteFile(fs, path, initConfigContent, filePermission); err != nil {
+		return fmt.Errorf("create a config file: %w", err)
 	}
 	return nil
 }
