@@ -4,10 +4,17 @@
 
 ## Why ghaperf?
 
-[Existing tools](#related-projects) rely on the [Workflow Jobs API](https://docs.github.com/en/rest/actions/workflow-jobs), which doesn't include step-level data from composite actions. **ghaperf** solves this by:
+1. [Existing tools](#related-projects) can't detect bottlenecks inside steps. ghaperf solves this by analyzing actions logs.
+1. Many existing tools need metrics storage, so the setup is bothersome and it costs. ghaperf doesn't need any storage, so it's easy to use and free 💰
 
-- Retrieving and parsing raw job logs via the API
-- Extracting timing data from all log groups, including steps within composite actions
+## Key Features
+
+- **Deep visibility into composite actions** - Detect bottlenecks inside composite actions that other tools miss
+- **No infrastructure needed** - Just a CLI tool, no backend or metrics storage required
+- Multiple analysis modes - Analyze workflows, workflow runs, or individual jobs
+- Markdown reports - Generate shareable performance reports
+- Intelligent caching - Cache GitHub API responses for completed runs to speed up analysis
+- Flexible filtering - Filter and normalize job names using configuration files
 
 ## Quick Start
 
@@ -179,15 +186,6 @@ The job has no slow steps
 The job has no slow steps
 
 </details>
-
-## Key Features
-
-- **Deep visibility into composite actions** - Detect bottlenecks inside composite actions that other tools miss
-- **Multiple analysis modes** - Analyze workflows, workflow runs, or individual jobs
-- **Markdown reports** - Generate shareable performance reports
-- **No infrastructure needed** - Just a CLI tool, no backend or metrics storage required
-- **Intelligent caching** - Cache GitHub API responses for completed runs to speed up analysis
-- **Flexible filtering** - Filter and normalize job names using configuration files
 
 ## Installation
 
