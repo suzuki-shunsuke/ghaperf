@@ -20,6 +20,9 @@ func (v *Viewer) ShowRun(run *collector.WorkflowRun, threshold time.Duration) {
 		if job.Job.GetStatus() != "completed" {
 			continue
 		}
+		if job.Job.GetConclusion() == "skipped" {
+			continue
+		}
 		d := job.Duration()
 		if d < threshold {
 			continue
