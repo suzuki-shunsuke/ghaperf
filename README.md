@@ -5,7 +5,7 @@
 ## Why ghaperf?
 
 1. [Existing tools](#related-projects) can't detect bottlenecks inside steps. ghaperf solves this by analyzing actions logs.
-1. Many existing tools need metrics storage, so the setup is bothersome and it costs. ghaperf doesn't need any storage, so it's easy to use and free 💰
+1. Many existing tools need metrics storage, so the setup is bothersome and it costs 💸. ghaperf doesn't need any storage, so it's easy to use and free
 
 ## Key Features
 
