@@ -147,6 +147,9 @@ func setMetricsByJob(jobMetrics map[string]*JobMetric, slowestJobs map[string]*c
 	if job.Job.GetStatus() != "completed" {
 		return
 	}
+	if job.Job.GetConclusion() == "skipped" {
+		return
+	}
 	// Get the slowest job for each normalized job name
 	if slowestJobs[job.NormalizedName].Duration() < job.Duration() {
 		slowestJobs[job.NormalizedName] = job
