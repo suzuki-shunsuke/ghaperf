@@ -379,7 +379,7 @@ This speeds up repeated analyses and reduces API calls.
 ref. [Group log lines](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-commands#grouping-log-lines)
 
 By grouping log lines properly, you can analyze the performance using ghaperf more deeply.
-Especially, if a specific step (run step, JavaScript Action, or Docker Action) is doing various things, you can analyze the bottlenecks inside them by grouping log lines properly.
+Especially, if a specific step (run step, JavaScript Action, or Docker Action) is doing various things and slow, you can analyze the bottlenecks inside the step by grouping log lines properly.
 
 ## Important Notes
 
