@@ -11,7 +11,7 @@ require (
 	github.com/suzuki-shunsuke/gen-go-jsonschema v0.1.0
 	github.com/suzuki-shunsuke/ghtkn-go-sdk v0.2.1
 	github.com/suzuki-shunsuke/slog-error v0.2.1
-	golang.org/x/oauth2 v0.33.0
+	golang.org/x/oauth2 v0.34.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
