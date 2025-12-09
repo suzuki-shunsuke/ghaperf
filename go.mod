@@ -21,7 +21,6 @@ require (
 	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/danieljoos/wincred v1.2.2 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
-	github.com/google/go-github/v74 v74.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/invopop/jsonschema v0.12.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
