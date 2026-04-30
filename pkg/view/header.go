@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/go-github/v80/github"
+	"github.com/google/go-github/v85/github"
 	"github.com/suzuki-shunsuke/ghaperf/pkg/config"
 )
 
