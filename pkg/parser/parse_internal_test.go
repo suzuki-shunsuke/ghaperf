@@ -9,17 +9,18 @@ import (
 
 func Test_parseLine(t *testing.T) {
 	t.Parallel()
+	const invalid = "invalid"
 	tests := []struct {
 		name string
 		txt  string
 		line *Line
 	}{
 		{
-			name: "invalid",
-			txt:  "invalid",
+			name: invalid,
+			txt:  invalid,
 			line: &Line{
 				Continue: true,
-				Content:  "invalid",
+				Content:  invalid,
 			},
 		},
 		{
