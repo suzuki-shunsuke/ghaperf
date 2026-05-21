@@ -3,6 +3,7 @@ package github
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -39,7 +40,10 @@ func New(ctx context.Context, logger *slog.Logger, input *InputNew) (*Client, er
 	if err != nil {
 		return nil, err
 	}
-	gh := github.NewClient(httpClient)
+	gh, err := github.NewClient(github.WithHTTPClient(httpClient))
+	if err != nil {
+		return nil, fmt.Errorf("create a GitHub client: %w", err)
+	}
 	return &Client{
 		actions: gh.Actions,
 		// This is used to download logs with redirect URLs.
