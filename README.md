@@ -1,8 +1,8 @@
 # ghaperf
 
-[![DeepWiki](https://img.shields.io/badge/DeepWiki-suzuki--shunsuke%2Fghaperf-blue.svg?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACwAAAAyCAYAAAAnWDnqAAAAAXNSR0IArs4c6QAAA05JREFUaEPtmUtyEzEQhtWTQyQLHNak2AB7ZnyXZMEjXMGeK/AIi+QuHrMnbChYY7MIh8g01fJoopFb0uhhEqqcbWTp06/uv1saEDv4O3n3dV60RfP947Mm9/SQc0ICFQgzfc4CYZoTPAswgSJCCUJUnAAoRHOAUOcATwbmVLWdGoH//PB8mnKqScAhsD0kYP3j/Yt5LPQe2KvcXmGvRHcDnpxfL2zOYJ1mFwrryWTz0advv1Ut4CJgf5uhDuDj5eUcAUoahrdY/56ebRWeraTjMt/00Sh3UDtjgHtQNHwcRGOC98BJEAEymycmYcWwOprTgcB6VZ5JK5TAJ+fXGLBm3FDAmn6oPPjR4rKCAoJCal2eAiQp2x0vxTPB3ALO2CRkwmDy5WohzBDwSEFKRwPbknEggCPB/imwrycgxX2NzoMCHhPkDwqYMr9tRcP5qNrMZHkVnOjRMWwLCcr8ohBVb1OMjxLwGCvjTikrsBOiA6fNyCrm8V1rP93iVPpwaE+gO0SsWmPiXB+jikdf6SizrT5qKasx5j8ABbHpFTx+vFXp9EnYQmLx02h1QTTrl6eDqxLnGjporxl3NL3agEvXdT0WmEost648sQOYAeJS9Q7bfUVoMGnjo4AZdUMQku50McDcMWcBPvr0SzbTAFDfvJqwLzgxwATnCgnp4wDl6Aa+Ax283gghmj+vj7feE2KBBRMW3FzOpLOADl0Isb5587h/U4gGvkt5v60Z1VLG8BhYjbzRwyQZemwAd6cCR5/XFWLYZRIMpX39AR0tjaGGiGzLVyhse5C9RKC6ai42ppWPKiBagOvaYk8lO7DajerabOZP46Lby5wKjw1HCRx7p9sVMOWGzb/vA1hwiWc6jm3MvQDTogQkiqIhJV0nBQBTU+3okKCFDy9WwferkHjtxib7t3xIUQtHxnIwtx4mpg26/HfwVNVDb4oI9RHmx5WGelRVlrtiw43zboCLaxv46AZeB3IlTkwouebTr1y2NjSpHz68WNFjHvupy3q8TFn3Hos2IAk4Ju5dCo8B3wP7VPr/FGaKiG+T+v+TQqIrOqMTL1VdWV1DdmcbO8KXBz6esmYWYKPwDL5b5FA1a0hwapHiom0r/cKaoqr+27/XcrS5UwSMbQAAAABJRU5ErkJggg==)](https://deepwiki.com/suzuki-shunsuke/ghaperf)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/suzuki-shunsuke/ghaperf)
 
-**ghaperf** analyzes the performance of GitHub Actions workflows using GitHub API and raw job logs. Unlike other tools, it can detect bottlenecks **inside composite actions** by parsing job logs and extracting step-level timing data.
+ghaperf analyzes the performance of GitHub Actions workflows using GitHub API and raw job logs. Unlike other tools, it can detect bottlenecks inside composite actions by parsing job logs and extracting step-level timing data.
 
 ## Why ghaperf?
 
@@ -11,8 +11,8 @@
 
 ## Key Features
 
-- **Deep visibility into composite actions** - Detect bottlenecks inside composite actions that other tools miss
-- **No infrastructure needed** - Just a CLI tool, no backend or metrics storage required
+- Deep visibility into composite actions - Detect bottlenecks inside composite actions that other tools miss
+- No infrastructure needed - Just a CLI tool, no backend or metrics storage required
 - Multiple analysis modes - Analyze workflows, workflow runs, or individual jobs
 - Markdown reports - Generate shareable performance reports
 - Intelligent caching - Cache GitHub API responses for completed runs to speed up analysis
@@ -207,7 +207,7 @@ export GITHUB_TOKEN=xxx
 
 ### Analysis Modes
 
-**1. Analyze multiple workflow runs** (recommended for performance insights)
+1. Analyze multiple workflow runs (recommended for performance insights)
 
 ```sh
 ghaperf \
@@ -220,7 +220,7 @@ ghaperf \
 > [!NOTE]
 > Higher `--count` values provide better insights but take longer to process.
 
-**2. Analyze a single workflow run**
+2. Analyze a single workflow run
 
 ```sh
 ghaperf \
@@ -228,7 +228,7 @@ ghaperf \
   --run-id "<workflow run id>"
 ```
 
-**3. Analyze a specific job**
+3. Analyze a specific job
 
 ```sh
 ghaperf \
@@ -236,7 +236,7 @@ ghaperf \
   --job-id "<workflow job id>"
 ```
 
-**4. Analyze a local log file**
+4. Analyze a local log file
 
 ```sh
 ghaperf --log-file path/to/job.log
@@ -275,12 +275,12 @@ A GitHub access token is required to fetch workflow runs, jobs, and logs via the
 >
 > The message says `Must have admin rights to Repository.`, but actually we confirmed the message is wrong because non admin user can download logs.
 
-**Required Permissions:**
+Required Permissions:
 - Public repositories
   - Permissions to access action logs is required, but [they are ambiguous due to the bug of GitHub](https://github.com/orgs/community/discussions/24742). And there are sevel types of GitHub Access tokens, so it's a bit difficult to describe accurately
 - Private repositories: `Actions: Read` permission
 
-**Setup:**
+Setup:
 
 ```sh
 # Option 1: Use GITHUB_TOKEN
@@ -297,7 +297,7 @@ export GHAPERF_GHTKN=true
 
 ghaperf reports steps and log groups that exceed the specified threshold:
 
-**Threshold Configuration:**
+Threshold Configuration:
 - Default: `30s`
 - Set via `--threshold` flag or `GHAPERF_THRESHOLD` environment variable
 - Format: [Go duration](https://pkg.go.dev/time#ParseDuration) (e.g., `1s`, `2m30s`)
@@ -335,12 +335,12 @@ job_name_mappings:
   "test / test / test .*": "test / test / test"
 ```
 
-**Available Fields:**
+Available Fields:
 - `job_names`: List of regular expressions - only matching jobs are analyzed
 - `excluded_job_names`: List of regular expressions - matching jobs are excluded
 - `job_name_mappings`: Map of regular expressions to normalized names for matrix jobs and old job names
 
-**JSON Schema and Validation:**
+JSON Schema and Validation:
 
 The configuration schema is available at [json-schema/ghaperf.json](json-schema/ghaperf.json).
 
@@ -350,7 +350,7 @@ Validate your configuration with [ajv-cli](https://ajv.js.org/packages/ajv-cli.h
 ajv --spec=draft2020 -s json-schema/ghaperf.json -d ghaperf.yaml
 ```
 
-**IDE Support:**
+IDE Support:
 
 Enable auto-completion in your editor by adding this to your config file:
 
@@ -372,7 +372,7 @@ Or pin to a specific version:
 
 ghaperf automatically caches API responses for completed workflow runs and jobs to improve performance on subsequent analyses.
 
-**Cache location:** `${XDG_CACHE_HOME:-${HOME}/.cache}/ghaperf/`
+Cache location: `${XDG_CACHE_HOME:-${HOME}/.cache}/ghaperf/`
 
 This speeds up repeated analyses and reduces API calls.
 
@@ -385,11 +385,11 @@ Especially, if a specific step (run step, JavaScript Action, or Docker Action) i
 
 ## Important Notes
 
-1. **Log availability timing:** Job logs must be fully processed by GitHub. If a job just completed, the API may not have logs ready yet. Wait a few moments and retry.
+1. Log availability timing: Job logs must be fully processed by GitHub. If a job just completed, the API may not have logs ready yet. Wait a few moments and retry.
 
-2. **Log format changes:** GitHub's log format is not officially documented. ghaperf parses logs based on observed patterns, which may break if GitHub changes the format unexpectedly.
+2. Log format changes: GitHub's log format is not officially documented. ghaperf parses logs based on observed patterns, which may break if GitHub changes the format unexpectedly.
 
-3. **Log retention:** [GitHub retains workflow logs for 90 days by default](https://docs.github.com/en/organizations/managing-organization-settings/configuring-the-retention-period-for-github-actions-artifacts-and-logs-in-your-organization). Analysis of older runs may fail if logs have been deleted.
+3. Log retention: [GitHub retains workflow logs for 90 days by default](https://docs.github.com/en/organizations/managing-organization-settings/configuring-the-retention-period-for-github-actions-artifacts-and-logs-in-your-organization). Analysis of older runs may fail if logs have been deleted.
 
 ## Related Projects
 
