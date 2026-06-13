@@ -21,7 +21,6 @@ USAGE:
 
 OPTIONS:
    --log-level <debug|info|warn|error>    Log level (or set GHIR_LOG_LEVEL)
-   --ghtkn                                Enable the integration with ghtkn (or set GHAPERF_GHTKN)
    --repo <owner>/<repo>                  The repository
    --run-id <run id>                      The run ID
    --job-id <job id>                      The job ID
@@ -55,7 +54,6 @@ func parseFlags(f *controller.InputRun) {
 	pflag.Int64Var(&f.JobID, "job-id", 0, "job ID")
 	pflag.StringVar(&f.Threshold, "threshold", "", "threshold")
 	pflag.StringVar(&f.LogFile, "log-file", "", "log file")
-	pflag.BoolVar(&f.EnableGHTKN, "ghtkn", false, "Enable the integration with ghtkn")
 	pflag.BoolVarP(&f.Help, "help", "h", false, "Show help")
 	pflag.BoolVar(&f.Init, "init", false, "Initialize the config file")
 	pflag.BoolVarP(&f.Version, "version", "v", false, "Show version")

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
-	"strconv"
 	"strings"
 	"time"
 
@@ -29,7 +28,6 @@ type InputRun struct {
 	Threshold               string
 	LogFile                 string
 	Args                    []string
-	EnableGHTKN             bool
 	Help                    bool
 	Init                    bool
 	Version                 bool
@@ -42,7 +40,6 @@ type InputRun struct {
 const (
 	envLogLevel           = "GHAPERF_LOG_LEVEL"
 	envGhaperfGitHubToken = "GHAPERF_GITHUB_TOKEN" //nolint:gosec
-	envEnableGHTKN        = "GHAPERF_GHTKN"
 	envGhaperfThreshold   = "GHAPERF_THRESHOLD"
 	envGitHubToken        = "GITHUB_TOKEN" //nolint:gosec
 )
@@ -87,8 +84,7 @@ func (c *Controller) Run(ctx context.Context, logger *slog.Logger, logLevelVar *
 	}
 
 	gh, err := github.New(ctx, logger, &github.InputNew{
-		GHTKNEnabled: inputRun.EnableGHTKN,
-		AccessToken:  getGitHubToken(arg.Getenv),
+		AccessToken: getGitHubToken(arg.Getenv),
 	})
 	if err != nil {
 		return fmt.Errorf("create GitHub client: %w", err)
@@ -100,10 +96,6 @@ func (c *Controller) Run(ctx context.Context, logger *slog.Logger, logLevelVar *
 }
 
 func (c *Controller) getInput(input *InputRun, arg *Arg) (*collector.Input, error) {
-	if err := setEnableGHTKN(input, arg.Getenv); err != nil {
-		return nil, err
-	}
-
 	threshold, err := getThreshold(input.Threshold, arg.Getenv)
 	if err != nil {
 		return nil, err
@@ -211,21 +203,5 @@ func setLogLevel(levelVar *slog.LevelVar, level string, getEnv func(string) stri
 			return err //nolint:wrapcheck
 		}
 	}
-	return nil
-}
-
-func setEnableGHTKN(flag *InputRun, getEnv func(string) string) error {
-	if flag.EnableGHTKN {
-		return nil
-	}
-	s := getEnv(envEnableGHTKN)
-	if s == "" {
-		return nil
-	}
-	b, err := strconv.ParseBool(s)
-	if err != nil {
-		return fmt.Errorf("%s must be boolean: %w", envEnableGHTKN, err)
-	}
-	flag.EnableGHTKN = b
 	return nil
 }
