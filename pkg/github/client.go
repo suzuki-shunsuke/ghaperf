@@ -70,8 +70,19 @@ func newTokenSource(logger *slog.Logger, input *InputNew) (oauth2.TokenSource, e
 			&oauth2.Token{AccessToken: input.AccessToken},
 		), nil
 	}
-	if input.GHTKNEnabled {
-		client := ghtkn.New()
+	f, err := ghtkn.Enabled(&ghtkn.InputEnabled{
+		Envs: []string{
+			"GHAPERF_GHTKN",
+		},
+	})
+	if err != nil {
+		return nil, fmt.Errorf("check ghtkn enabled: %w", err)
+	}
+	if f {
+		client, err := ghtkn.New()
+		if err != nil {
+			return nil, fmt.Errorf("create a ghtkn client: %w", err)
+		}
 		return client.TokenSource(logger, &ghtkn.InputGet{}), nil
 	}
 	return nil, errAccessTokenRequired
