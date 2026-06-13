@@ -13,7 +13,6 @@ USAGE:
 
 OPTIONS:
    --log-level <debug|info|warn|error>    Log level (or set GHIR_LOG_LEVEL)
-   --ghtkn                                Enable the integration with ghtkn (or set GHAPERF_GHTKN)
    --repo <owner>/<repo>                  The repository
    --run-id <run id>                      The run ID
    --job-id <job id>                      The job ID
@@ -33,5 +32,5 @@ OPTIONS:
    --version, -v                          Show version
 
 VERSION:
-   v0.1.1
+   v1.0.0
 ```
