@@ -7,7 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/google/go-github/v88/github"
+	"github.com/google/go-github/v89/github"
 	"github.com/suzuki-shunsuke/ghtkn-go-sdk/ghtkn"
 	"golang.org/x/oauth2"
 )
