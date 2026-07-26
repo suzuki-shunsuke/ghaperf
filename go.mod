@@ -5,7 +5,7 @@ go 1.26.5
 require (
 	github.com/google/go-cmp v0.7.0
 	github.com/google/go-github/v89 v89.0.0
-	github.com/lmittmann/tint v1.1.3
+	github.com/lmittmann/tint v1.2.0
 	github.com/spf13/afero v1.15.0
 	github.com/spf13/pflag v1.0.10
 	github.com/suzuki-shunsuke/gen-go-jsonschema v0.1.0
