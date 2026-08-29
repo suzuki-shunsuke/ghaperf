@@ -15,9 +15,7 @@ func (c *Client) ListWorkflowRuns(ctx context.Context, owner, repo string, fileN
 		HeadSHA:             opts.HeadSHA,
 		ExcludePullRequests: opts.ExcludePullRequests,
 		CheckSuiteID:        opts.CheckSuiteID,
-		ListOptions: ListOptions{
-			PerPage: maxPerPage,
-		},
+		PerPage:             maxPerPage,
 	}
 	if maxCount < maxPerPage {
 		o.PerPage = maxCount
