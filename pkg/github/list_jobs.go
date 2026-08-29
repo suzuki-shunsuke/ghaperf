@@ -8,9 +8,7 @@ import (
 func (c *Client) ListWorkflowJobs(ctx context.Context, owner, repo string, runID int64, attempt int) ([]*WorkflowJob, error) {
 	list := c.getListJobsFunc(attempt)
 	opts := &ListWorkflowJobsOptions{
-		ListOptions: ListOptions{
-			PerPage: maxPerPage,
-		},
+		PerPage: maxPerPage,
 	}
 	arr := []*WorkflowJob{}
 	for range 10 { // max 1000 jobs
@@ -38,10 +36,8 @@ func (c *Client) getListJobsFunc(attempt int) func(ctx context.Context, owner, r
 	}
 	return func(ctx context.Context, owner, repo string, runID int64, page int) (*Jobs, *Response, error) {
 		return c.actions.ListWorkflowJobs(ctx, owner, repo, runID, &ListWorkflowJobsOptions{
-			ListOptions: ListOptions{
-				Page:    page,
-				PerPage: maxPerPage,
-			},
+			Page:    page,
+			PerPage: maxPerPage,
 		})
 	}
 }
