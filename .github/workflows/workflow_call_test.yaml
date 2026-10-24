@@ -9,7 +9,7 @@ permissions: {}
 jobs:
   # Download Go modules once and share them with integration-test and test
   gomodule:
-    uses: suzuki-shunsuke/download-go-module-action/.github/workflows/download.yaml@59ba5863b931de21763c13df6ad926cf98158517 # v0.0.8
+    uses: suzuki-shunsuke/download-go-module-action/.github/workflows/download.yaml@e03acd0c9d3d230019ebb7bd4a62507431fe4316 # v0.0.10
     permissions:
       contents: read
       id-token: write
@@ -27,7 +27,7 @@ jobs:
 
   test:
     needs: [gomodule]
-    uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@8400b0e4fd3f85098d210765b78790079ea6d29e # v3.2.3
+    uses: suzuki-shunsuke/go-test-workflow/.github/workflows/test.yaml@ff8934b3958ec0c1b0a6fce445052e2d2a42e8c9 # v3.2.4
     with:
       aqua_version: v2.65.2
       golangci-lint-timeout: 120s
